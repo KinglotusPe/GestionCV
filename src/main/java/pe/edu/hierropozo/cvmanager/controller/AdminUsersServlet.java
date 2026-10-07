@@ -1,0 +1,64 @@
+package pe.edu.hierropozo.cvmanager.controller;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.Set;
+import pe.edu.hierropozo.cvmanager.dao.UserDAO;
+import pe.edu.hierropozo.cvmanager.dao.UserDAOImpl;
+import pe.edu.hierropozo.cvmanager.model.User;
+
+/**
+ * Controlador administrativo para la gestión de usuarios y cambio de estados
+ * (activar, suspender, dar de baja).
+ */
+@WebServlet("/admin/users")
+public class AdminUsersServlet extends HttpServlet {
+
+    private final UserDAO userDAO = new UserDAOImpl();
+    private static final Set<String> ALLOWED_STATUSES = Set.of("active", "inactive", "pending", "suspended");
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        try {
+            String roleFilter = request.getParameter("role");
+            String statusFilter = request.getParameter("status");
+
+            List<User> users = userDAO.findAll(roleFilter, statusFilter);
+
+            request.setAttribute("users", users);
+            request.setAttribute("pageTitle", "Gestión de Usuarios - CVManager");
+
+            request.getRequestDispatcher("/WEB-INF/views/admin/users.jsp").forward(request, response);
+
+        } catch (Exception e) {
+            throw new ServletException("Error al listar usuarios para administración", e);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        try {
+            int userId = Integer.parseInt(request.getParameter("id"));
+            String status = request.getParameter("status");
+
+            if (!ALLOWED_STATUSES.contains(status)) {
+                throw new IllegalArgumentException("Estado de usuario no permitido: " + status);
+            }
+
+            userDAO.updateStatus(userId, status);
+            response.sendRedirect(request.getContextPath() + "/admin/users?ok=1");
+
+        } catch (Exception e) {
+            throw new ServletException("Error al actualizar estado del usuario", e);
+        }
+    }
+}
