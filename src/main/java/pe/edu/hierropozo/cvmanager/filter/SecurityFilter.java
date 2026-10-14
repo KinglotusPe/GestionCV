@@ -9,6 +9,7 @@ import java.util.UUID;
 import pe.edu.hierropozo.cvmanager.dao.UserDAOImpl;
 import pe.edu.hierropozo.cvmanager.model.User;
 import pe.edu.hierropozo.cvmanager.util.AuditUtil;
+import pe.edu.hierropozo.cvmanager.util.JsonResponse;
 
 /** Ordered before authorization in web.xml. Rechecks access on every request. */
 public class SecurityFilter implements Filter {
@@ -36,12 +37,14 @@ public class SecurityFilter implements Filter {
                         || !user.getRole().equals(session.getAttribute("role"))
                         || !user.getPasswordHash().equals(session.getAttribute("authVersion"))) {
                     session.invalidate();
-                    response.sendRedirect(request.getContextPath() + "/login?auth=1");
+                    if(JsonResponse.requested(request))JsonResponse.send(response,401,java.util.Map.of("message","La sesión expiró. Inicie sesión nuevamente."));
+                    else response.sendRedirect(request.getContextPath() + "/login?auth=1");
                     return;
                 }
             } catch (Exception e) { throw new ServletException("No se pudo comprobar la sesión", e); }
         } else if (privatePath) {
-            response.sendRedirect(request.getContextPath() + "/login?auth=1");
+            if(JsonResponse.requested(request))JsonResponse.send(response,401,java.util.Map.of("message","La sesión expiró. Inicie sesión nuevamente."));
+                    else response.sendRedirect(request.getContextPath() + "/login?auth=1");
             return;
         }
         if (session.getAttribute("csrfToken") == null) session.setAttribute("csrfToken", UUID.randomUUID().toString());
@@ -51,7 +54,8 @@ public class SecurityFilter implements Filter {
                 String actual = request.getParameter("csrfToken");
                 String expected = (String) session.getAttribute("csrfToken");
                 if (actual == null || !MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8), actual.getBytes(StandardCharsets.UTF_8))) {
-                    response.sendError(403, "El formulario expiró. Recargue la página e intente nuevamente.");
+                    if(JsonResponse.requested(request))JsonResponse.send(response,403,java.util.Map.of("message","El formulario expiró. Recargue la página."));
+                    else response.sendError(403, "El formulario expiró. Recargue la página e intente nuevamente.");
                     return;
                 }
             }

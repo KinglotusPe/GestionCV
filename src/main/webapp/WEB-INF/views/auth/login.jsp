@@ -62,10 +62,10 @@
 
                 <div class="text-center pt-3 border-top mt-3">
                     <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
-                        <span class="badge bg-primary text-white fw-bold px-2 py-1" style="font-size: 0.72rem; letter-spacing: 0.5px;">SIGAEST</span>
+                        <span class="badge bg-primary text-white fw-bold px-2 py-1" style="font-size: 0.72rem; letter-spacing: 0.5px;">MAHP</span>
                         <span class="text-secondary small fw-bold">CVMANAGER</span>
                     </div>
-                    <small class="text-muted" style="font-size: 0.72rem;">SIGAEST &reg; 2025 - IDEX MAHP</small>
+                    <small class="text-muted" style="font-size: 0.72rem;">Portal de empleabilidad - IDEX MAHP</small>
                 </div>
             </div>
 

@@ -35,7 +35,7 @@ Todas las operaciones POST requieren token CSRF, incluido el inicio de sesión. 
 ## Instalación nueva
 
 1. Instalar JDK 17+, Maven, MySQL 8 y Tomcat 11.
-2. Importar `database/cvmanager_hierropozo_db.sql`. El script crea 19 tablas y los cuatro programas institucionales; no elimina bases existentes.
+2. Importar `database/cvmanager_hierropozo_db.sql`. El script crea 23 tablas y los cuatro programas institucionales; no elimina bases existentes.
 3. Configurar la conexión con las variables siguientes o con `src/main/resources/database.properties`:
 
 | Variable | Uso |
@@ -60,7 +60,8 @@ Hacer una copia de seguridad, seleccionar la base existente en MySQL y aplicar, 
 
 1. `database/migrations/001_complete_flows.sql`: tabla de recuperación de contraseña y normalización de documentos vacíos.
 2. `database/migrations/002_jobs.sql`: vacantes y postulaciones.
-3. Desplegar el nuevo WAR y conservar la carpeta de archivos original.
+3. `database/migrations/003_labor_portal.sql`: convocatorias ampliadas, carreras destinatarias, documentos y revisiones de empresas.
+4. Desplegar el nuevo WAR y conservar la carpeta de archivos original.
 
 Las migraciones son repetibles y no eliminan las tablas anteriores. Las sesiones de la versión anterior deberán iniciar sesión nuevamente. No es necesario volver a crear al administrador.
 
@@ -74,13 +75,13 @@ El administrador verifica la identidad del titular y genera un enlace desde Usua
 mvn test
 ```
 
-Ejecuta 21 pruebas unitarias sin MySQL: validaciones, BCrypt, campos de CV y rechazo de archivos inválidos.
+Ejecuta 28 pruebas unitarias sin MySQL: validaciones, BCrypt, campos de CV y rechazo de archivos inválidos.
 
 ```text
 mvn -Pintegration verify
 ```
 
-Incluye 11 pruebas de integración, para un total de 32, y genera el WAR. Antes de ejecutarlo, importar el esquema en una base aislada cuyo nombre termine en `_test` y apuntar las variables `CVMANAGER_DB_*` a ella. Las pruebas de escritura crean usuarios con identificadores únicos y los eliminan al terminar. No usar una base productiva.
+Incluye 18 pruebas de integración, para un total de 46, y genera el WAR. Antes de ejecutarlo, importar el esquema en una base aislada cuyo nombre termine en `_test` y apuntar las variables `CVMANAGER_DB_*` a ella. Las pruebas de escritura crean usuarios con identificadores únicos y los eliminan al terminar. No usar una base productiva.
 
 También se incluye `scripts/smoke_test.py`, que verifica los flujos HTTP reales en un Tomcat local aislado:
 
@@ -101,4 +102,17 @@ La instancia de pruebas debe tener esquema importado y `CVMANAGER_SETUP_TOKEN` c
 - `src/test`: pruebas unitarias y de integración.
 - `scripts/smoke_test.py`: pruebas de flujos sobre HTTP.
 
-La guía para el IDE está en `docs/GUIA_NETBEANS_TOMCAT11.md`.
+Las guías de IDE están en `docs/GUIA_ECLIPSE.md` y `docs/GUIA_NETBEANS_TOMCAT11.md`. La matriz de temas, evidencias y guion de sustentación está en `docs/CUMPLIMIENTO_SILABO.md`.
+
+## Bolsa laboral institucional
+
+La interfaz autenticada usa menú lateral, barra superior, tablas con búsqueda, ordenamiento y paginación, y una adaptación responsive para móviles. Las funciones de CV y los tres roles originales se conservan.
+
+- **Convocatorias:** fechas de inicio y cierre, turno, cantidad de puestos, requisitos, funciones, beneficios, condiciones, enlace HTTP/HTTPS y varios programas destinatarios. Sin programas seleccionados significa cualquier carrera; son destinatarios informativos, no una exclusión automática de candidatos.
+- **Vigencia:** por comenzar, en proceso, finalizada y archivada. Solo se puede postular en proceso, con empresa activa y consentimiento. Las fechas límite son inclusivas según la fecha de MySQL. Archivar oculta la convocatoria al egresado; conserva su historial de postulaciones y permite restaurarla.
+- **Administración:** `/admin/jobs` permite crear convocatorias para empresas activas y archivar/restaurar las existentes. Cada convocatoria conserva su administrador: la empresa edita las propias; el administrador institucional edita las que creó. La evaluación de candidatos permanece en la empresa destinataria.
+- **Documentos:** PDF de hasta 5 MB por archivo; alta y eliminación solo por quien administra la convocatoria. Descarga autenticada, validación de formato y almacenamiento fuera del directorio web. No se copia documentación de SIGAEST.
+- **Empresas:** `/admin/companies` permite aprobar, rechazar/desactivar y suspender con sustento obligatorio e historial. El registro se realiza desde el formulario existente. La gestión general de usuarios conserva sus permisos administrativos anteriores.
+- **Reportes:** `/admin/reports` ofrece convocatorias por fecha de registro, candidatos únicos por empresa o carrera y listado de postulaciones por fecha de envío. Exportación XLSX real, sin fórmulas ejecutables provenientes de texto de usuario. PDF mediante imprimir/guardar como PDF del navegador; no generación directa en servidor.
+
+Referencia funcional y límites: `docs/BOLSA_LABORAL.md`. Esta ampliación no sustituye los requisitos aún pendientes del documento del profesor, como verificación por correo y recuperación automática por correo.

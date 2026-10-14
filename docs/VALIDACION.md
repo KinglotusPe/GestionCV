@@ -44,3 +44,18 @@ Fecha: 8 de octubre de 2026.
 - Carga de páginas de auditoría y estadísticas.
 
 Las pruebas son una validación funcional y de regresión; no constituyen una auditoría externa de seguridad ni una prueba de carga. El acceso público requiere configurar el despliegue y aplicar las migraciones descritas en el README. Las notificaciones se muestran dentro del sistema; no existe envío automático de correos.
+
+
+## Ampliación de bolsa laboral — 13 de octubre de 2026
+
+- 42 pruebas Java aprobadas (25 unitarias y 17 de integración), sin fallos ni errores.
+- 136 comprobaciones HTTP aprobadas en la instancia aislada; incluyen las 104 anteriores y 32 adicionales de bolsa laboral.
+- Migración 003 aplicada a la base de pruebas; esquema principal actualizado para instalaciones nuevas.
+- Verificados: fechas invertidas, convocatorias futuras/finalizadas/archivadas, pertenencia y administrador de convocatoria, varias carreras, rollback ante carrera inválida, documentos PDF y descarga autorizada, revisión de empresas con motivo, cuatro reportes y archivo XLSX válido.
+- Interfaz inspeccionada en navegador a tamaño escritorio y 390 × 844; menú lateral, listado y navegación móvil.
+- La exportación PDF se realiza mediante imprimir/guardar PDF del navegador. No se incorporó un generador PDF en el servidor.
+- No se modificó SIGAEST, la base habitual ni el Tomcat habitual. WAR actualizado disponible en `target/cvmanager.war`.
+
+## Adecuación al sílabo (13/10/2026)
+
+46 pruebas Java aprobadas (28 unitarias y 18 de integración), tanto con javac como con ECJ mediante el perfil eclipse. 144 verificaciones HTTP aprobadas sobre Tomcat 11 y MySQL aislados. Incluyen Ajax con JSON, validación, CSRF, roles, persistencia del historial y DisplayTag. La prueba de rollback comprueba que un fallo al insertar el historial no altera el estado de la empresa. Véase CUMPLIMIENTO_SILABO.md para la correspondencia completa.

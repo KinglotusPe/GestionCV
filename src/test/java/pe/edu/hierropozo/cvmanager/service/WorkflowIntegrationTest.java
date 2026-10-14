@@ -80,6 +80,83 @@ class WorkflowIntegrationTest {
         execute("UPDATE vacantes SET status='closed' WHERE job_id=?",job);
         assertThrows(IllegalArgumentException.class,()->jobs.apply(other,job,"Postular cerrado"));
     }
+    @Test void futureAndArchivedVacanciesRejectApplications()throws Exception {
+        var portal=new LaborPortalService();var dao=new JobDAO();
+        var p=new HashMap<>(Map.of("title","Programada","description","Funciones","city","Ayacucho","modality","onsite","status","open","openingDate",java.time.LocalDate.now().plusDays(2).toString()));
+        portal.save(company,"company",null,p,null);
+        int job=((Number)dao.list(company,"company","Programada",null,null).get(0).get("job_id")).intValue();
+        assertEquals("upcoming",dao.find(company,"company",job).get("stage"));
+        assertThrows(IllegalArgumentException.class,()->new JobService().apply(graduate,job,"Postulación adelantada"));
+        p.remove("openingDate");portal.save(company,"company",job,p,null);
+        portal.archive(company,"company",job,true);
+        assertThrows(IllegalArgumentException.class,()->new JobService().apply(graduate,job,"Postulación archivada"));
+        assertThrows(IllegalArgumentException.class,()->dao.find(graduate,"graduate",job));
+        assertEquals(dao.list(graduate,"graduate",null,"ongoing",null).size(),new AdminService().stats().get("jobs"));
+        portal.archive(company,"company",job,false);assertEquals("ongoing",dao.find(graduate,"graduate",job).get("stage"));
+    }
+    @Test void multipleCareersSaveAtomicallyAndOwnershipIsEnforced()throws Exception {
+        var portal=new LaborPortalService();var dao=new JobDAO();
+        var p=Map.of("title","Multicarrera","description","Funciones","city","Ayacucho","modality","onsite","status","open");
+        portal.save(company,"company",null,p,new String[]{"1","2"});
+        int job=((Number)dao.list(company,"company","Multicarrera",null,null).get(0).get("job_id")).intValue();
+        assertEquals(2,((List<?>)dao.find(company,"company",job).get("careerIds")).size());
+        assertThrows(IllegalArgumentException.class,()->portal.save(company,"company",job,p,new String[]{"2147483647"}));
+        assertEquals(2,((List<?>)dao.find(company,"company",job).get("careerIds")).size());
+        assertThrows(IllegalArgumentException.class,()->portal.save(other,"company",job,p,null));
+        assertThrows(IllegalArgumentException.class,()->portal.save(admin,"admin",job,p,null));
+        portal.archive(admin,"admin",job,true);
+    }
+    @Test void documentDownloadChecksVacancyAccess()throws Exception {
+        var portal=new LaborPortalService();var dao=new JobDAO();
+        portal.save(company,"company",null,Map.of("title","Documentada","description","Funciones","city","Ayacucho","modality","onsite","status","open"),null);
+        int job=((Number)dao.list(company,"company","Documentada",null,null).get(0).get("job_id")).intValue();
+        byte[] pdf="%PDF-1.4\n%%EOF".getBytes(java.nio.charset.StandardCharsets.US_ASCII);
+        try {
+            assertThrows(IllegalArgumentException.class,()->portal.addDocument(company,"company",job,"Falso","<html>".getBytes()));
+            portal.addDocument(company,"company",job,"Bases",pdf);
+            int doc=((Number)portal.documents(company,"company",job).get(0).get("document_id")).intValue();
+            assertNotNull(portal.download(graduate,"graduate",doc));
+            assertThrows(IllegalArgumentException.class,()->portal.download(other,"company",doc));
+            portal.archive(company,"company",job,true);
+            assertThrows(IllegalArgumentException.class,()->portal.download(graduate,"graduate",doc));
+            portal.removeDocument(company,"company",job,doc);
+            assertTrue(portal.documents(company,"company",job).isEmpty());
+        }finally {for(var doc:portal.documents(company,"company",job))portal.removeDocument(company,"company",job,((Number)doc.get("document_id")).intValue());}
+    }
+    @Test void companyDecisionRequiresReasonAndRecordsHistory()throws Exception {
+        var portal=new LaborPortalService();int id=((Number)JobDAO.rows("SELECT company_id FROM empresas WHERE user_id=?",company).get(0).get("company_id")).intValue();
+        assertThrows(IllegalArgumentException.class,()->portal.review(admin,id,"active",""));
+        portal.review(admin,id,"suspended","Revisión pendiente");assertEquals("suspended",users.findById(company).getStatus());
+        portal.review(admin,id,"active","Documentación validada");assertEquals("active",users.findById(company).getStatus());
+        assertEquals(2,JobDAO.rows("SELECT review_id FROM empresa_revisiones WHERE company_id=?",id).size());
+    }
+    @Test void institutionalVacancyHasIndependentEditorAndExpires()throws Exception {
+        var portal=new LaborPortalService();var dao=new JobDAO();
+        int companyId=((Number)JobDAO.rows("SELECT company_id FROM empresas WHERE user_id=?",company).get(0).get("company_id")).intValue();
+        var p=new HashMap<>(Map.of("title","Institucional","description","Funciones","city","Ayacucho","modality","onsite","status","open","companyId",String.valueOf(companyId),"closingDate",java.time.LocalDate.now().minusDays(1).toString()));
+        portal.save(admin,"admin",null,p,null);
+        int job=((Number)dao.list(admin,"admin","Institucional",null,null).get(0).get("job_id")).intValue();
+        assertEquals("finished",dao.find(admin,"admin",job).get("stage"));
+        assertThrows(IllegalArgumentException.class,()->portal.save(company,"company",job,p,null));
+        assertThrows(IllegalArgumentException.class,()->new JobService().apply(graduate,job,"Fuera de plazo"));
+        p.put("closingDate",java.time.LocalDate.now().plusDays(1).toString());portal.save(admin,"admin",job,p,null);
+        assertEquals("ongoing",dao.find(admin,"admin",job).get("stage"));
+    }
+    @Test void reviewRollsBackStateWhenHistoryInsertFails()throws Exception {
+        var portal=new LaborPortalService();int id=((Number)JobDAO.rows("SELECT company_id FROM empresas WHERE user_id=?",company).get(0).get("company_id")).intValue();
+        String before=users.findById(company).getStatus();
+        int count=JobDAO.rows("SELECT review_id FROM empresa_revisiones WHERE company_id=?",id).size();
+        // Actor inexistente provoca un fallo FK en el segundo INSERT, después del UPDATE.
+        assertThrows(SQLException.class,()->portal.review(Integer.MAX_VALUE,id,"suspended","Prueba controlada de rollback"));
+        assertEquals(before,users.findById(company).getStatus());
+        assertEquals(count,JobDAO.rows("SELECT review_id FROM empresa_revisiones WHERE company_id=?",id).size());
+    }
+    @Test void reportFiltersDatesAndRejectsUnknownTypes()throws Exception {
+        var portal=new LaborPortalService();
+        for(String kind:List.of("jobs","companies","careers","applicants"))assertNotNull(portal.report(kind,"2000-01-01","2099-12-31"));
+        assertTrue(portal.report("jobs","1900-01-01","1900-01-02").isEmpty());
+        assertThrows(IllegalArgumentException.class,()->portal.report("sql","2000-01-01","2099-12-31"));
+    }
     private void execute(String sql,int id)throws SQLException {
         try(Connection c=DBConnection.getConnection();PreparedStatement st=c.prepareStatement(sql)){st.setInt(1,id);st.executeUpdate();}
     }

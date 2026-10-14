@@ -49,7 +49,8 @@ public class AuthorizationFilter implements Filter {
         }
 
         if (!isAuthorized) {
-            httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Acceso no autorizado para este rol.");
+            if(pe.edu.hierropozo.cvmanager.util.JsonResponse.requested(httpRequest))pe.edu.hierropozo.cvmanager.util.JsonResponse.send(httpResponse,403,java.util.Map.of("message","Acceso no autorizado para este rol."));
+            else httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Acceso no autorizado para este rol.");
             return;
         }
 

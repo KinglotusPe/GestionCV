@@ -1,0 +1,11 @@
+<c:if test="${not adminMode}"><section id="applications" class="mt-4"><h3>${companyMode ? 'Postulaciones recibidas' : 'Mis postulaciones'}</h3>
+<c:if test="${empty applications}"><p class="text-muted">Todavía no hay postulaciones.</p></c:if>
+<c:forEach var="a" items="${applications}"><article class="card p-4 mb-3"><h4 class="h5"><c:out value="${a.title}"/> · <c:out value="${a.company_name}"/></h4>
+<c:if test="${companyMode}"><p><c:out value="${a.first_name} ${a.last_name}"/> · <c:out value="${a.email}"/> · <c:out value="${a.phone}"/></p><c:if test="${a.status != 'withdrawn' and not empty a.email}"><a class="mb-3" href="${pageContext.request.contextPath}/company/cv?id=${a.cv_id}">Ver CV del postulante</a></c:if></c:if>
+<p style="white-space:pre-wrap"><c:out value="${a.message}"/></p>
+<p>Estado: <strong><c:choose><c:when test="${a.status == 'pending'}">Pendiente</c:when><c:when test="${a.status == 'reviewing'}">En evaluación</c:when><c:when test="${a.status == 'accepted'}">Aceptada</c:when><c:when test="${a.status == 'rejected'}">Rechazada</c:when><c:otherwise>Retirada</c:otherwise></c:choose></strong></p>
+<c:if test="${a.status != 'withdrawn'}"><form method="post" action="${jobsPath}" class="d-flex gap-2">
+<hp:csrf/><input type="hidden" name="action" value="respond"><input type="hidden" name="id" value="${a.application_id}">
+<c:choose><c:when test="${companyMode}"><select class="form-select" name="status"><option value="pending" ${a.status == 'pending' ? 'selected' : ''}>Pendiente</option><option value="reviewing" ${a.status == 'reviewing' ? 'selected' : ''}>En evaluación</option><option value="accepted" ${a.status == 'accepted' ? 'selected' : ''}>Aceptada</option><option value="rejected" ${a.status == 'rejected' ? 'selected' : ''}>Rechazada</option></select><button class="btn btn-success">Actualizar</button></c:when><c:otherwise><button class="btn btn-outline-danger" name="status" value="withdrawn">Retirar postulación y acceso al CV</button></c:otherwise></c:choose>
+</form></c:if></article></c:forEach>
+</section></c:if>

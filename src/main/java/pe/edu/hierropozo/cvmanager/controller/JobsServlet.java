@@ -1,37 +1,71 @@
 package pe.edu.hierropozo.cvmanager.controller;
 import jakarta.servlet.*;
-import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.annotation.*;
 import jakarta.servlet.http.*;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.*;
-import pe.edu.hierropozo.cvmanager.service.JobService;
-import pe.edu.hierropozo.cvmanager.dao.CareerDAOImpl;
+import pe.edu.hierropozo.cvmanager.service.*;
+import pe.edu.hierropozo.cvmanager.dao.*;
+import pe.edu.hierropozo.cvmanager.util.FileStorage;
 
-@WebServlet(urlPatterns={"/graduate/jobs","/company/jobs"})
+@WebServlet(urlPatterns={"/graduate/jobs","/company/jobs","/admin/jobs"})
+@MultipartConfig(maxFileSize=5*1024*1024,maxRequestSize=6*1024*1024,fileSizeThreshold=1024*1024)
 public class JobsServlet extends HttpServlet {
     private final JobService service=new JobService();
+    private final LaborPortalService portal=new LaborPortalService();
+    private String role(HttpServletRequest req){return (String)req.getSession().getAttribute("role");}
+    private int actor(HttpServletRequest req){return (Integer)req.getSession().getAttribute("userId");}
     @Override protected void doGet(HttpServletRequest req,HttpServletResponse res)throws ServletException,IOException {
-        int id=(Integer)req.getSession().getAttribute("userId");boolean company="company".equals(req.getSession().getAttribute("role"));
+        int actor=actor(req);String role=role(req);
         try {
-            req.setAttribute("companyMode",company);req.setAttribute("jobs",service.list(id,company,req.getParameter("q")));
-            req.setAttribute("applications",service.applications(id,company));req.setAttribute("careers",new CareerDAOImpl().findAll(true));
-            if(company&&req.getParameter("edit")!=null)req.setAttribute("editing",service.findOwn(id,Integer.parseInt(req.getParameter("edit"))));
-            req.setAttribute("pageTitle",company?"Mis vacantes y candidatos":"Vacantes y postulaciones");req.getRequestDispatcher("/WEB-INF/views/common/jobs.jsp").forward(req,res);
+            if(req.getParameter("document")!=null) {
+                try {
+                    String name=portal.download(actor,role,Integer.parseInt(req.getParameter("document")));
+                    var path=FileStorage.resolve("pdf",name);
+                    if(!Files.isRegularFile(path)){res.sendError(404);return;}
+                    res.setContentType("application/pdf");res.setHeader("Content-Disposition","attachment; filename=\"convocatoria.pdf\"");
+                    res.setContentLengthLong(Files.size(path));Files.copy(path,res.getOutputStream());return;
+                }catch(IllegalArgumentException e){res.sendError(404);return;}
+            }
+            req.setAttribute("companyMode",role.equals("company"));req.setAttribute("adminMode",role.equals("admin"));req.setAttribute("manageMode",!role.equals("graduate"));
+            req.setAttribute("jobsPath",req.getContextPath()+"/"+role+"/jobs");
+            req.setAttribute("jobs",new JobDAO().list(actor,role,req.getParameter("q"),req.getParameter("stage"),req.getParameter("archive")));
+            req.setAttribute("applications",role.equals("admin")?List.of():service.applications(actor,role.equals("company")));
+            req.setAttribute("careers",new CareerDAOImpl().findAll(false));
+            if(role.equals("admin"))req.setAttribute("companies",portal.companies());
+            String selected=req.getParameter("edit")!=null?req.getParameter("edit"):req.getParameter("view");
+            if(selected!=null) {
+                int id=Integer.parseInt(selected);var job=new JobDAO().find(actor,role,id);
+                req.setAttribute("selected",job);
+                Object manager=job.get("managed_by");
+                boolean editable=role.equals("admin")?manager!=null&&((Number)manager).intValue()==actor:role.equals("company")&&manager==null;
+                req.setAttribute("editable",editable);req.setAttribute("documents",portal.documents(actor,role,id));
+                if(req.getParameter("edit")!=null){if(!editable)throw new IllegalArgumentException("Esta convocatoria tiene otro administrador.");req.setAttribute("editing",job);}
+            }
+            req.setAttribute("pageTitle","Bolsa laboral - Convocatorias");
+            req.getRequestDispatcher("/WEB-INF/views/common/jobs.jsp").forward(req,res);
         }catch(Exception e){throw new ServletException(e);}
     }
     @Override protected void doPost(HttpServletRequest req,HttpServletResponse res)throws ServletException,IOException {
-        int id=(Integer)req.getSession().getAttribute("userId");boolean company="company".equals(req.getSession().getAttribute("role"));
+        int actor=actor(req);String role=role(req);boolean manager=!role.equals("graduate");
         try {
             String action=Objects.toString(req.getParameter("action"),"");
-            if(company&&action.equals("save")) {
+            String raw=req.getParameter("id");Integer id=raw==null||raw.isBlank()?null:Integer.valueOf(raw);
+            if(manager&&action.equals("save")) {
                 Map<String,String> params=new HashMap<>();req.getParameterMap().forEach((k,v)->params.put(k,v[0]));
-                String jobId=req.getParameter("id");service.save(id,jobId==null||jobId.isBlank()?null:Integer.valueOf(jobId),params);
-            } else if(!company&&action.equals("apply")) {
+                portal.save(actor,role,id,params,req.getParameterValues("careerId"));
+            }else if(manager&&action.equals("archive"))portal.archive(actor,role,id,"yes".equals(req.getParameter("archived")));
+            else if(manager&&action.equals("upload")) {
+                Part file=req.getPart("file");if(file==null)throw new IllegalArgumentException("Seleccione un PDF.");
+                try(var in=file.getInputStream()){portal.addDocument(actor,role,id,req.getParameter("title"),in.readNBytes(5*1024*1024+1));}finally{file.delete();}
+            }else if(manager&&action.equals("removeDocument"))portal.removeDocument(actor,role,id,Integer.parseInt(req.getParameter("documentId")));
+            else if(role.equals("graduate")&&action.equals("apply")) {
                 if(!"yes".equals(req.getParameter("consent")))throw new IllegalArgumentException("Confirme que desea compartir su CV y datos con la empresa.");
-                service.apply(id,Integer.parseInt(req.getParameter("id")),req.getParameter("message"));
-            } else if(action.equals("respond"))service.respond(id,company,Integer.parseInt(req.getParameter("id")),req.getParameter("status"));
+                service.apply(actor,id,req.getParameter("message"));
+            }else if(!role.equals("admin")&&action.equals("respond"))service.respond(actor,role.equals("company"),id,req.getParameter("status"));
             else throw new IllegalArgumentException("Acción inválida.");
-            res.sendRedirect(req.getContextPath()+(company?"/company/jobs":"/graduate/jobs")+"?ok=1");
+            res.sendRedirect(req.getContextPath()+"/"+role+"/jobs?ok=1"+(Set.of("upload","removeDocument").contains(action)?"&view="+id:""));
         }catch(Exception e){throw new ServletException(e);}
     }
 }
