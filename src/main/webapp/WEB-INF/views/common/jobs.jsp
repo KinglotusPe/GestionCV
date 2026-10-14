@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ include file="header.jspf" %>
+<%@ include file="header.jsp" %>
 <div class="page-heading"><div><p class="eyebrow">BOLSA LABORAL</p><h1 class="h3">${param.tab == 'applications' ? (companyMode ? 'Postulaciones recibidas' : 'Mis postulaciones') : param.archive == 'yes' ? 'Convocatorias archivadas' : 'Convocatorias laborales'}</h1></div><c:if test="${manageMode}"><a class="btn btn-outline-secondary" href="${jobsPath}${param.archive == 'yes' ? '' : '?archive=yes'}">${param.archive == 'yes' ? 'Ver convocatorias' : 'Ver archivadas'}</a></c:if></div>
 <c:if test="${param.tab != 'applications'}">
 <c:if test="${manageMode}"><details class="portal-panel mb-4" ${not empty editing ? 'open' : ''}><summary class="h5 mb-0">${empty editing ? 'Nueva convocatoria' : 'Editar convocatoria'}</summary>
@@ -36,4 +36,4 @@
 </div></td></tr></c:forEach></tbody></table></div><c:if test="${empty jobs}"><p class="alert alert-info">No hay convocatorias para estos filtros.</p></c:if></section>
 </c:if>
 <%@ include file="applications.jspf" %>
-<%@ include file="footer.jspf" %>
+<%@ include file="footer.jsp" %>

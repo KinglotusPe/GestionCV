@@ -1,0 +1,4 @@
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ include file="../common/header.jsp" %>
+<section class="portal-panel"><h1>Panel del egresado</h1><p>Seleccione el módulo que desea utilizar.</p><a class="btn btn-outline-success m-2" href="${pageContext.request.contextPath}/graduate/profile">Mi perfil</a><a class="btn btn-outline-success m-2" href="${pageContext.request.contextPath}/graduate/cv">Mi currículum</a><a class="btn btn-outline-success m-2" href="${pageContext.request.contextPath}/graduate/jobs">Convocatorias</a><a class="btn btn-outline-success m-2" href="${pageContext.request.contextPath}/graduate/requests">Propuestas de contacto</a></section>
+<%@ include file="../common/footer.jsp" %>

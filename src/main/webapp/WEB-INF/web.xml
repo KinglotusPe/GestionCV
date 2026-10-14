@@ -4,10 +4,11 @@
          xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_1.xsd"
          version="6.1">
 
-    <filter><filter-name>security</filter-name><filter-class>pe.edu.hierropozo.cvmanager.filter.SecurityFilter</filter-class></filter>
+    <filter><filter-name>security</filter-name><filter-class>com.cvmanager.filters.Autenticacion_Filtro</filter-class></filter>
     <filter-mapping><filter-name>security</filter-name><url-pattern>/*</url-pattern></filter-mapping>
-    <filter><filter-name>authorization</filter-name><filter-class>pe.edu.hierropozo.cvmanager.filter.AuthorizationFilter</filter-class></filter>
+    <filter><filter-name>authorization</filter-name><filter-class>com.cvmanager.filters.Autorizacion_Filtro</filter-class></filter>
     <filter-mapping><filter-name>authorization</filter-name><url-pattern>/graduate/*</url-pattern><url-pattern>/company/*</url-pattern><url-pattern>/admin/*</url-pattern></filter-mapping>
+    <security-constraint><web-resource-collection><web-resource-name>Archivos privados</web-resource-name><url-pattern>/uploads/*</url-pattern></web-resource-collection><auth-constraint/></security-constraint>
     <display-name>CVManager Hierro Pozo</display-name>
 
     <error-page><error-code>400</error-code><location>/WEB-INF/views/error/400.jsp</location></error-page>

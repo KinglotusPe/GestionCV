@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ include file="../common/header.jspf" %>
+<%@ include file="../common/header.jsp" %>
 
 <div class="login-bg-wrapper my-3">
     <div class="login-portal-card shadow-lg">
@@ -8,7 +8,7 @@
             <!-- Columna Izquierda: Formulario de Inicio de Sesión -->
             <div class="col-lg-6 login-col-form">
                 <div class="text-center mb-4">
-                    <img src="${pageContext.request.contextPath}/assets/images/logo_hierro_pozo.png"
+                    <img src="${pageContext.request.contextPath}/assets/images/logo.png"
                          alt="Logo Hierro Pozo"
                          class="mb-2"
                          style="width: 85px; height: 85px; object-fit: contain;">
@@ -50,9 +50,7 @@
                     </div>
 
                     <div class="text-center my-3">
-                        <a href="#" class="text-decoration-none small text-muted" data-bs-toggle="modal" data-bs-target="#modalRecuperar">
-                            ¿Olvidaste tu contraseña?
-                        </a>
+                        <a href="${pageContext.request.contextPath}/forgot-password">¿Olvidaste tu contraseña?</a>
                     </div>
 
                     <button class="btn btn-login-action w-100 py-2 fw-bold" type="submit">
@@ -186,4 +184,4 @@
     </div>
 </div>
 
-<%@ include file="../common/footer.jspf" %>
+<%@ include file="../common/footer.jsp" %>

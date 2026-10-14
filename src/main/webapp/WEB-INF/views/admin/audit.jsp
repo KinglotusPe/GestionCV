@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ include file="../common/header.jspf" %>
+<%@ include file="../common/header.jsp" %>
 
 <div class="mb-4">
     <h2 class="section-title mb-1">
@@ -64,4 +64,4 @@
     </div>
 </div>
 
-<%@ include file="../common/footer.jspf" %>
+<%@ include file="../common/footer.jsp" %>

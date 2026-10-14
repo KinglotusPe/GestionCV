@@ -1,5 +1,5 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ include file="../common/header.jspf" %>
+<%@ include file="../common/header.jsp" %>
 <div class="card p-4"><h2>Mi empresa</h2><form method="post" action="${pageContext.request.contextPath}/company/profile">
 <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
 <label class="form-label">Razón social</label><input class="form-control mb-3" name="companyName" maxlength="150" required value="<c:out value='${company.company_name}'/>">
@@ -10,4 +10,4 @@
 <label class="form-label">Sitio web</label><input class="form-control mb-3" name="website" type="url" maxlength="255" value="<c:out value='${company.website}'/>">
 <label class="form-label">Descripción</label><textarea class="form-control mb-3" name="description" rows="4" maxlength="5000"><c:out value="${company.description}"/></textarea>
 <button class="btn btn-success">Guardar perfil</button></form></div>
-<%@ include file="../common/footer.jspf" %>
+<%@ include file="../common/footer.jsp" %>

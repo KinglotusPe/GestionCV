@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ include file="../common/header.jspf" %>
+<%@ include file="../common/header.jsp" %>
 
 <div class="row justify-content-center py-5 text-center">
     <div class="col-md-6">
@@ -20,4 +20,4 @@
     </div>
 </div>
 
-<%@ include file="../common/footer.jspf" %>
+<%@ include file="../common/footer.jsp" %>

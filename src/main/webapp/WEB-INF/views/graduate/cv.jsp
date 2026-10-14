@@ -1,6 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ include file="../common/header.jspf" %>
+<%@ include file="../common/header.jsp" %>
 
 <!-- Cabecera del CV y Estado de Publicación -->
 <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
@@ -437,4 +437,4 @@
 
 </div>
 
-<%@ include file="../common/footer.jspf" %>
+<%@ include file="../common/footer.jsp" %>

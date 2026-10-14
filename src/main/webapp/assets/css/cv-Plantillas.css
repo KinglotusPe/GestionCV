@@ -1,0 +1,4 @@
+/* Presentación de los currículums y sus formularios. */
+.cv-character-count { display:block; margin-top:.4rem; }
+.cv-document { line-height:1.6; overflow-wrap:anywhere; }
+@media print { .cv-document { color:#000; background:#fff; } }

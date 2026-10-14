@@ -44,6 +44,12 @@ if 'adminEmail' not in config:
     check('initial administrator setup',result[0]==200 and 'adminCreated=1' in result[2])
 check('admin login',admin.login(config['adminEmail'],config['adminPassword'])[2].endswith('/admin/dashboard'))
 check('anonymous private route redirects', '/login?auth=1' in guest.request('/graduate/cv')[2])
+for path in ['/about','/contact','/forgot-password']:
+    check('public structure page '+path,guest.request(path)[0]==200)
+check('upload directories are not public',guest.request('/uploads/photos/.gitkeep')[0]==403)
+for asset in ['css/admin.css','css/cv-Plantillas.css','js/validaci%C3%B3n.js','js/cv-Constructor.js','images/default-avatar.png','images/logo.png']:
+    check('structure asset '+asset,guest.request('/assets/'+asset)[0]==200)
+
 check('CSRF rejected',admin.request('/admin/users',{'id':'1','status':'active'})[0]==403)
 users={}
 for role,label in [('graduate','grad'),('graduate','other'),('company','company')]:
@@ -55,6 +61,10 @@ for role,label in [('graduate','grad'),('graduate','other'),('company','company'
     users[label]=(client,email,uid)
 grad,email,gid=users['grad'];other,_,oid=users['other'];company,_,cid=users['company']
 check('role boundary',grad.request('/admin/users')[0]==403)
+check('graduate panel',grad.request('/graduate/dashboard')[0]==200)
+check('company panel',company.request('/company/dashboard')[0]==200)
+check('panel role boundary',grad.request('/company/dashboard')[0]==403)
+
 profile=dict(firstName='María " onfocus="alert(1)',lastName='Pruebas',documentType='DNI',documentNumber='',phone='999123456',address='',city='Ayacucho',country='Perú',birthDate='',linkedinUrl='',portfolioUrl='',careerId='1',graduationYear='2026',publicProfile='on')
 check('graduate profile saves',grad.post('/graduate/profile',profile)[0]==200)
 check('second blank document saves',other.post('/graduate/profile',{**profile,'firstName':'Otro'})[0]==200)

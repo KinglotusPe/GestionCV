@@ -1,14 +1,14 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
-<%@ include file="../common/header.jspf" %>
+<%@ include file="../common/header.jsp" %>
 
 <div class="row">
     <!-- Columna Principal: Currículum Vítae Completo -->
     <div class="col-lg-8 mb-4">
-        <div class="card p-4 p-md-5 shadow-sm">
+        <div class="card p-4 p-md-5 shadow-sm cv-document">
             <div class="d-flex align-items-center gap-3 pb-3 border-bottom mb-4">
                 <div class="bg-light p-3 rounded-circle text-success">
-                    <c:choose><c:when test="${not empty graduate.photoUrl}"><img class="rounded-circle" width="80" height="80" style="object-fit:cover" alt="Foto del candidato" src="${pageContext.request.contextPath}/files?type=photo&amp;cvId=${cv.cvId}"></c:when><c:otherwise><i class="fa-solid fa-user-graduate fa-2x"></i></c:otherwise></c:choose>
+                    <c:choose><c:when test="${not empty graduate.photoUrl}"><img class="rounded-circle" width="80" height="80" style="object-fit:cover" alt="Foto del candidato" src="${pageContext.request.contextPath}/files?type=photo&amp;cvId=${cv.cvId}"></c:when><c:otherwise><img src="${pageContext.request.contextPath}/assets/images/default-avatar.png" width="80" height="80" alt="Avatar predeterminado"></c:otherwise></c:choose>
                 </div>
                 <div>
                     <h2 class="fw-bold mb-1"><c:out value="${graduate.fullName}"/></h2>
@@ -161,4 +161,4 @@
     </div>
 </div>
 
-<%@ include file="../common/footer.jspf" %>
+<%@ include file="../common/footer.jsp" %>

@@ -75,13 +75,13 @@ El administrador verifica la identidad del titular y genera un enlace desde Usua
 mvn test
 ```
 
-Ejecuta 28 pruebas unitarias sin MySQL: validaciones, BCrypt, campos de CV y rechazo de archivos inválidos.
+Ejecuta 29 pruebas unitarias sin MySQL: validaciones, BCrypt, campos de CV y rechazo de archivos inválidos.
 
 ```text
 mvn -Pintegration verify
 ```
 
-Incluye 18 pruebas de integración, para un total de 46, y genera el WAR. Antes de ejecutarlo, importar el esquema en una base aislada cuyo nombre termine en `_test` y apuntar las variables `CVMANAGER_DB_*` a ella. Las pruebas de escritura crean usuarios con identificadores únicos y los eliminan al terminar. No usar una base productiva.
+Incluye 18 pruebas de integración, para un total de 47, y genera el WAR. Antes de ejecutarlo, importar el esquema en una base aislada cuyo nombre termine en `_test` y apuntar las variables `CVMANAGER_DB_*` a ella. Las pruebas de escritura crean usuarios con identificadores únicos y los eliminan al terminar. No usar una base productiva.
 
 También se incluye `scripts/smoke_test.py`, que verifica los flujos HTTP reales en un Tomcat local aislado:
 
@@ -93,10 +93,10 @@ La instancia de pruebas debe tener esquema importado y `CVMANAGER_SETUP_TOKEN` c
 
 ## Estructura
 
-- `src/main/java/.../controller`: rutas y formularios.
-- `src/main/java/.../service`: registro, CV, cuentas, vacantes, búsquedas y estadísticas.
-- `src/main/java/.../dao`: persistencia JDBC.
-- `src/main/java/.../filter`: seguridad, sesión y autorización.
+- `src/main/java/com/cvmanager/controllers`: rutas y formularios.
+- `src/main/java/com/cvmanager/services`: registro, CV, cuentas, vacantes, búsquedas y estadísticas.
+- `src/main/java/com/cvmanager/dao`: persistencia JDBC.
+- `src/main/java/com/cvmanager/filters`: seguridad, sesión y autorización.
 - `src/main/webapp/WEB-INF/views`: vistas protegidas.
 - `database/migrations`: actualización incremental.
 - `src/test`: pruebas unitarias y de integración.
@@ -116,3 +116,9 @@ La interfaz autenticada usa menú lateral, barra superior, tablas con búsqueda,
 - **Reportes:** `/admin/reports` ofrece convocatorias por fecha de registro, candidatos únicos por empresa o carrera y listado de postulaciones por fecha de envío. Exportación XLSX real, sin fórmulas ejecutables provenientes de texto de usuario. PDF mediante imprimir/guardar como PDF del navegador; no generación directa en servidor.
 
 Referencia funcional y límites: `docs/BOLSA_LABORAL.md`. Esta ampliación no sustituye los requisitos aún pendientes del documento del profesor, como verificación por correo y recuperación automática por correo.
+
+## Estructura del punto 6
+
+El proyecto se identifica como `CV_Administrador` y usa el paquete `com.cvmanager`. Los contratos están en `dao/interfaces` y las implementaciones JDBC en `dao/impl`. La correspondencia completa de archivos y las decisiones de despliegue se documentan en [ESTRUCTURA_PUNTO_6.md](docs/ESTRUCTURA_PUNTO_6.md).
+
+Para preparar un borrador de correo de recuperación en Usuarios, configurar `CVMANAGER_PUBLIC_URL` con la URL pública del contexto (por ejemplo, `https://instituto.example/cvmanager`). El administrador revisa y entrega el mensaje; no hay envío SMTP automático.

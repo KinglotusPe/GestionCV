@@ -59,3 +59,7 @@ Las pruebas son una validación funcional y de regresión; no constituyen una au
 ## Adecuación al sílabo (13/10/2026)
 
 46 pruebas Java aprobadas (28 unitarias y 18 de integración), tanto con javac como con ECJ mediante el perfil eclipse. 144 verificaciones HTTP aprobadas sobre Tomcat 11 y MySQL aislados. Incluyen Ajax con JSON, validación, CSRF, roles, persistencia del historial y DisplayTag. La prueba de rollback comprueba que un fallo al insertar el historial no altera el estado de la empresa. Véase CUMPLIMIENTO_SILABO.md para la correspondencia completa.
+
+## Reorganización del punto 6 (13/10/2026)
+
+Los 78 nombres de archivo indicados en el árbol del documento están presentes. Se migró a com.cvmanager, se separaron interfaces e implementaciones DAO y se conectaron los modelos y componentes JSP. Pasaron 47 pruebas Java (29 unitarias y 18 de integración), incluidas referencias de archivos JSP, y 157 comprobaciones HTTP. La compilación ECJ también pasó 47 pruebas. Se comprobó en el navegador el texto UTF-8, DataTables y una revisión Ajax de la empresa de demostración. El WAR no contiene clases del paquete anterior.

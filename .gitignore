@@ -3,3 +3,9 @@
 /.vscode/
 /nbproject/private/
 *.class
+
+/src/main/webapp/uploads/photos/*
+!/src/main/webapp/uploads/photos/.gitkeep
+/src/main/webapp/uploads/cvs/*
+!/src/main/webapp/uploads/cvs/.gitkeep
+/src/main/webapp/WEB-INF/lib/*.jar

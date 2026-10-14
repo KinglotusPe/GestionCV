@@ -8,7 +8,7 @@
     <artifactId>cvmanager-hierropozo</artifactId>
     <version>1.0.0</version>
     <packaging>war</packaging>
-    <name>CVManagerHierroPozo</name>
+    <name>CV_Administrador</name>
     <description>Sistema Web de Gestión de CV - IESP Manuel Antonio Hierro Pozo (Ayacucho)</description>
 
     <properties>
