@@ -35,6 +35,7 @@
                                 <c:out value="${f.first_name} ${f.last_name}"/>
                             </h5>
                             <form method="post" action="${pageContext.request.contextPath}/company/favorites" class="d-inline confirm-action">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                                 <input type="hidden" name="action" value="removeFavorite">
                                 <input type="hidden" name="favoriteId" value="${f.favorite_id}">
                                 <button class="btn btn-sm btn-link text-danger p-0" type="submit" title="Quitar de favoritos">
@@ -85,7 +86,7 @@
                                 <td><strong><c:out value="${r.first_name} ${r.last_name}"/></strong></td>
                                 <td><span class="badge bg-light text-dark border"><c:out value="${r.career}"/></span></td>
                                 <td class="small">
-                                    <i class="fa-solid fa-phone me-1"></i> <c:out value="${r.phone}"/><br>
+                                    <c:if test="${empty r.graduate_email}">Disponible al aceptar la solicitud</c:if><i class="fa-solid fa-phone me-1"></i> <c:out value="${r.phone}"/><br>
                                     <i class="fa-solid fa-envelope me-1"></i> <c:out value="${r.graduate_email}"/>
                                 </td>
                                 <td class="small text-muted" style="max-width: 250px;">

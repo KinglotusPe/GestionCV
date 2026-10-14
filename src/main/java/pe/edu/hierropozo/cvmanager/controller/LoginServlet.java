@@ -40,12 +40,14 @@ public class LoginServlet extends HttpServlet {
             User user = userDAO.findByEmail(email);
 
             if (user == null || !PasswordUtil.verify(password, user.getPasswordHash())) {
+                response.setStatus(401);
                 request.setAttribute("error", "Correo electrónico o contraseña incorrectos.");
                 doGet(request, response);
                 return;
             }
 
             if (!"active".equals(user.getStatus())) {
+                response.setStatus(401);
                 request.setAttribute("error", "Su cuenta no se encuentra activa. Estado actual: " + user.getStatus());
                 doGet(request, response);
                 return;
@@ -53,6 +55,9 @@ public class LoginServlet extends HttpServlet {
 
             // Crear sesión y almacenar atributos mínimos necesarios
             HttpSession session = request.getSession();
+            request.changeSessionId();
+            session.setAttribute("authVersion", user.getPasswordHash());
+            session.setAttribute("csrfToken", java.util.UUID.randomUUID().toString());
             session.setAttribute("userId", user.getUserId());
             session.setAttribute("email", user.getEmail());
             session.setAttribute("role", user.getRole());

@@ -31,7 +31,7 @@ public class CompanySearchServlet extends HttpServlet {
             String pageParam = request.getParameter("page");
             if (pageParam != null && !pageParam.isBlank()) {
                 try {
-                    page = Math.max(1, Integer.parseInt(pageParam.trim()));
+                    page = Math.min(100000, Math.max(1, Integer.parseInt(pageParam.trim())));
                 } catch (NumberFormatException ignored) {
                     page = 1;
                 }
@@ -42,9 +42,10 @@ public class CompanySearchServlet extends HttpServlet {
             String skill = request.getParameter("skill");
             String city = request.getParameter("city");
 
-            List<Map<String, Object>> results = searchService.search(query, career, skill, city, page, PAGE_SIZE);
+            List<Map<String, Object>> results = searchService.search(query, career, skill, city, request.getParameter("year"), page, PAGE_SIZE);
 
-            request.setAttribute("results", results);
+            request.setAttribute("hasNext",results.size()>PAGE_SIZE);
+            request.setAttribute("results", results.subList(0,Math.min(results.size(),PAGE_SIZE)));
             request.setAttribute("careers", careerDAO.findAll(true));
             request.setAttribute("page", page);
             request.setAttribute("pageTitle", "Búsqueda de Candidatos - CVManager");

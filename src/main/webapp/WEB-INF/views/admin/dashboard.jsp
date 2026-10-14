@@ -37,6 +37,7 @@
     </div>
 </div>
 
+<div class="row mb-4 g-3"><div class="col-md-6"><div class="card p-3"><h3 class="h6">Vacantes abiertas</h3><strong class="fs-3">${stats.jobs}</strong></div></div><div class="col-md-6"><div class="card p-3"><h3 class="h6">Postulaciones vigentes</h3><strong class="fs-3">${stats.applications}</strong></div></div></div>
 <!-- Gráfico de Egresados por Programa de Estudios -->
 <div class="card p-4 shadow-sm mb-4">
     <h4 class="section-title mb-3">
@@ -47,6 +48,7 @@
     </div>
 </div>
 
+<div id="careerLabels" hidden><c:forEach var="item" items="${byCareer}"><span><c:out value="${item.name}"/></span></c:forEach></div>
 <!-- Script Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -55,11 +57,7 @@
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: [
-                    <c:forEach var="item" items="${byCareer}" varStatus="loop">
-                        '<c:out value="${item.name}"/>'${!loop.last ? ',' : ''}
-                    </c:forEach>
-                ],
+                labels: Array.from(document.querySelectorAll('#careerLabels span'), el => el.textContent),
                 datasets: [{
                     label: 'Total de Egresados',
                     data: [

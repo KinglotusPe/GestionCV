@@ -48,13 +48,17 @@ public class AdminUsersServlet extends HttpServlet {
 
         try {
             int userId = Integer.parseInt(request.getParameter("id"));
-            String status = request.getParameter("status");
-
-            if (!ALLOWED_STATUSES.contains(status)) {
-                throw new IllegalArgumentException("Estado de usuario no permitido: " + status);
+            if ("resetPassword".equals(request.getParameter("action"))) {
+                if(userDAO.findById(userId)==null)throw new IllegalArgumentException("Usuario inexistente.");
+                String token=new pe.edu.hierropozo.cvmanager.service.PasswordService().issue(userId);
+                request.setAttribute("resetLink",request.getContextPath()+"/reset-password?token="+token);
+                request.setAttribute("resetEmail",userDAO.findById(userId).getEmail());
+                doGet(request,response);return;
             }
+            new pe.edu.hierropozo.cvmanager.service.UserManagementService().update(
+                (Integer)request.getSession().getAttribute("userId"),userId,request.getParameter("newRole"),request.getParameter("status"),
+                request.getParameter("firstName"),request.getParameter("lastName"),request.getParameter("companyName"));
 
-            userDAO.updateStatus(userId, status);
             response.sendRedirect(request.getContextPath() + "/admin/users?ok=1");
 
         } catch (Exception e) {

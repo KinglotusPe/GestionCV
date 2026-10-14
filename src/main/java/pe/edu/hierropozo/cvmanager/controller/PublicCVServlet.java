@@ -30,7 +30,13 @@ public class PublicCVServlet extends HttpServlet {
 
         try {
             int cvId = Integer.parseInt(request.getParameter("id"));
+            int companyUserId=(Integer)request.getSession().getAttribute("userId");
+            boolean applicationAccess=new pe.edu.hierropozo.cvmanager.service.JobService().canReadCv(companyUserId,cvId);
             Curriculum curriculum = curriculumDAO.findPublished(cvId);
+            if(curriculum==null&&applicationAccess) {
+                var rows=pe.edu.hierropozo.cvmanager.service.JobService.rows("SELECT graduate_id FROM cv WHERE cv_id=?",cvId);
+                if(!rows.isEmpty())curriculum=curriculumDAO.findByGraduate(((Number)rows.get(0).get("graduate_id")).intValue());
+            }
 
             if (curriculum == null) {
                 response.sendError(HttpServletResponse.SC_NOT_FOUND, "El currículum solicitado no existe o no está publicado.");
@@ -43,6 +49,11 @@ public class PublicCVServlet extends HttpServlet {
             // Registrar visualización de la empresa en el historial
             searchService.recordView(userId, cvId);
 
+            boolean accepted=false;
+            try(var c=pe.edu.hierropozo.cvmanager.config.DBConnection.getConnection();var st=c.prepareStatement("SELECT 1 FROM solicitudes_contacto s JOIN empresas e ON e.company_id=s.company_id WHERE s.graduate_id=? AND e.user_id=? AND s.status='accepted' LIMIT 1")) {
+                st.setInt(1,graduate.getGraduateId());st.setInt(2,userId);try(var rs=st.executeQuery()){accepted=rs.next() || applicationAccess;}
+            }
+            request.setAttribute("contactAccepted",accepted);
             request.setAttribute("cv", curriculum);
             request.setAttribute("graduate", graduate);
             request.setAttribute("education", curriculumDAO.section("educacion", "cv_id", cvId));

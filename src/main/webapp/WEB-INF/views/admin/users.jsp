@@ -9,6 +9,7 @@
     <p class="text-muted small">Administración de cuentas, aprobación de solicitudes y control de accesos</p>
 </div>
 
+<c:if test="${not empty resetLink}"><div class="alert alert-warning"><strong>Recuperación para <c:out value="${resetEmail}"/></strong><p>Verifique la identidad del titular y entréguele este enlace por un canal privado. Caduca en 30 minutos y se utiliza una sola vez.</p><a href="<c:out value='${resetLink}'/>">Enlace de recuperación</a></div></c:if>
 <!-- Filtro de Usuarios -->
 <div class="card p-3 shadow-sm mb-4">
     <form class="row g-3" method="get" action="${pageContext.request.contextPath}/admin/users">
@@ -87,21 +88,27 @@
                             </c:choose>
                         </td>
                         <td>
-                            <c:if test="${u.role != 'admin'}">
-                                <form method="post" action="${pageContext.request.contextPath}/admin/users" class="d-flex gap-1">
-                                    <input type="hidden" name="id" value="${u.userId}">
-                                    <c:if test="${u.status != 'active'}">
-                                        <button class="btn btn-sm btn-success fw-bold" type="submit" name="status" value="active" title="Activar / Aprobar">
-                                            <i class="fa-solid fa-check"></i> Activar
-                                        </button>
-                                    </c:if>
-                                    <c:if test="${u.status != 'suspended'}">
-                                        <button class="btn btn-sm btn-outline-danger" type="submit" name="status" value="suspended" title="Suspender acceso">
-                                            <i class="fa-solid fa-ban"></i> Suspender
-                                        </button>
-                                    </c:if>
-                                </form>
-                            </c:if>
+<details><summary class="btn btn-outline-success btn-sm">Administrar</summary>
+<form method="post" action="${pageContext.request.contextPath}/admin/users" class="mt-2">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
+<input type="hidden" name="id" value="${u.userId}">
+<label class="form-label">Rol</label><select class="form-select mb-2" name="newRole">
+<option value="graduate" ${u.role == 'graduate' ? 'selected' : ''}>Egresado</option>
+<option value="company" ${u.role == 'company' ? 'selected' : ''}>Empresa</option>
+<option value="admin" ${u.role == 'admin' ? 'selected' : ''}>Administrador</option></select>
+<label class="form-label">Estado</label><select class="form-select mb-2" name="status">
+<option value="active" ${u.status == 'active' ? 'selected' : ''}>Activo</option>
+<option value="pending" ${u.status == 'pending' ? 'selected' : ''}>Pendiente</option>
+<option value="inactive" ${u.status == 'inactive' ? 'selected' : ''}>Inactivo</option>
+<option value="suspended" ${u.status == 'suspended' ? 'selected' : ''}>Suspendido</option></select>
+<p class="small">Si cambia a un rol sin perfil previo, complete sus datos:</p>
+<input class="form-control mb-2" name="firstName" placeholder="Nombres del egresado" maxlength="80">
+<input class="form-control mb-2" name="lastName" placeholder="Apellidos del egresado" maxlength="100">
+<input class="form-control mb-2" name="companyName" placeholder="Nombre de empresa" maxlength="150">
+<button class="btn btn-success btn-sm" name="action" value="update">Guardar rol y estado</button></form>
+<form method="post" action="${pageContext.request.contextPath}/admin/users" class="mt-2 confirm-action">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
+<input type="hidden" name="id" value="${u.userId}"><button class="btn btn-outline-secondary btn-sm" name="action" value="resetPassword">Generar enlace de recuperación</button></form></details>
                         </td>
                     </tr>
                 </c:forEach>

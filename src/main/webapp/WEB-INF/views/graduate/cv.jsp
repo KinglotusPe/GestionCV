@@ -12,6 +12,7 @@
     </div>
     <div>
         <form method="post" action="${pageContext.request.contextPath}/graduate/cv" class="d-inline">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
             <c:choose>
                 <c:when test="${cv.published}">
                     <button type="submit" name="action" value="unpublish" class="btn btn-outline-danger fw-bold">
@@ -41,6 +42,7 @@
     </h4>
 
     <form method="post" action="${pageContext.request.contextPath}/graduate/cv" class="mb-4">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
         <input type="hidden" name="action" value="main">
         
         <div class="mb-3">
@@ -70,11 +72,14 @@
                 <i class="fa-solid fa-file-pdf text-danger fa-lg me-2"></i>
                 <span>Currículum adjunto cargado</span>
             </div>
-            <span class="badge bg-primary">Archivo PDF Activo</span>
+            <a class="btn btn-outline-primary" href="${pageContext.request.contextPath}/files?type=pdf&amp;cvId=${cv.cvId}">Descargar PDF</a>
+            <form method="post" action="${pageContext.request.contextPath}/graduate/upload">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}"><input type="hidden" name="type" value="pdf"><button class="btn btn-outline-danger" name="action" value="remove">Eliminar PDF</button></form>
         </div>
     </c:if>
 
     <form method="post" action="${pageContext.request.contextPath}/graduate/upload" enctype="multipart/form-data">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
         <input type="hidden" name="type" value="pdf">
         <label class="form-label small fw-bold">Adjuntar o actualizar archivo PDF:</label>
         <div class="input-group">
@@ -99,6 +104,7 @@
         <div id="collapseEdu" class="accordion-collapse collapse show" data-bs-parent="#cvAccordion">
             <div class="accordion-body">
                 <form method="post" action="${pageContext.request.contextPath}/graduate/cv" class="row g-2 mb-3">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                     <input type="hidden" name="action" value="addEducation">
                     <div class="col-md-4">
                         <input class="form-control" type="text" name="institution" placeholder="Institución / Universidad" required>
@@ -136,8 +142,10 @@
                                 <small class="text-muted"><c:out value="${item.institution}"/> | <c:out value="${item.field_of_study}"/></small>
                             </div>
                             <form method="post" action="${pageContext.request.contextPath}/graduate/cv" class="d-inline confirm-action">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                                 <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="type" value="education">
+                                <a class="btn btn-outline-primary btn-sm me-2" href="${pageContext.request.contextPath}/graduate/cv?action=edit&amp;type=education&amp;id=${item.education_id}">Editar</a>
+<input type="hidden" name="type" value="education">
                                 <input type="hidden" name="id" value="${item.education_id}">
                                 <button class="btn btn-outline-danger btn-sm" type="submit">
                                     <i class="fa-solid fa-trash"></i>
@@ -160,6 +168,7 @@
         <div id="collapseExp" class="accordion-collapse collapse" data-bs-parent="#cvAccordion">
             <div class="accordion-body">
                 <form method="post" action="${pageContext.request.contextPath}/graduate/cv" class="row g-2 mb-3">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                     <input type="hidden" name="action" value="addExperience">
                     <div class="col-md-4">
                         <input class="form-control" type="text" name="companyName" placeholder="Empresa / Organización" required>
@@ -193,8 +202,10 @@
                                 <small class="text-muted"><c:out value="${item.company_name}"/> | <c:out value="${item.responsibilities}"/></small>
                             </div>
                             <form method="post" action="${pageContext.request.contextPath}/graduate/cv" class="d-inline confirm-action">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                                 <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="type" value="experience">
+                                <a class="btn btn-outline-primary btn-sm me-2" href="${pageContext.request.contextPath}/graduate/cv?action=edit&amp;type=experience&amp;id=${item.experience_id}">Editar</a>
+<input type="hidden" name="type" value="experience">
                                 <input type="hidden" name="id" value="${item.experience_id}">
                                 <button class="btn btn-outline-danger btn-sm" type="submit">
                                     <i class="fa-solid fa-trash"></i>
@@ -217,6 +228,7 @@
         <div id="collapseSkills" class="accordion-collapse collapse" data-bs-parent="#cvAccordion">
             <div class="accordion-body">
                 <form method="post" action="${pageContext.request.contextPath}/graduate/cv" class="row g-2 mb-3">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                     <input type="hidden" name="action" value="addSkill">
                     <div class="col-md-5">
                         <input class="form-control" type="text" name="skillName" placeholder="Ej: Java, Redes Cisco, Diagnóstico Automotriz..." required>
@@ -249,8 +261,10 @@
                         <div class="badge bg-light text-dark border p-2 d-flex align-items-center gap-2">
                             <span><strong><c:out value="${item.skill_name}"/></strong> (${item.proficiency_level}/5)</span>
                             <form method="post" action="${pageContext.request.contextPath}/graduate/cv" class="d-inline">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                                 <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="type" value="skill">
+                                <a class="btn btn-outline-primary btn-sm me-2" href="${pageContext.request.contextPath}/graduate/cv?action=edit&amp;type=skill&amp;id=${item.skill_id}">Editar</a>
+<input type="hidden" name="type" value="skill">
                                 <input type="hidden" name="id" value="${item.skill_id}">
                                 <button class="btn btn-sm btn-link text-danger p-0 ms-1" type="submit" style="line-height:1;">
                                     <i class="fa-solid fa-xmark"></i>
@@ -273,6 +287,7 @@
         <div id="collapseLangs" class="accordion-collapse collapse" data-bs-parent="#cvAccordion">
             <div class="accordion-body">
                 <form method="post" action="${pageContext.request.contextPath}/graduate/cv" class="row g-2 mb-3">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                     <input type="hidden" name="action" value="addLanguage">
                     <div class="col-md-5">
                         <input class="form-control" type="text" name="languageName" placeholder="Ej: Quechua, Inglés..." required>
@@ -297,8 +312,10 @@
                         <div class="list-group-item d-flex justify-content-between align-items-center">
                             <span><strong><c:out value="${item.language_name}"/></strong> — Nivel: <c:out value="${item.proficiency_level}"/></span>
                             <form method="post" action="${pageContext.request.contextPath}/graduate/cv" class="d-inline">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                                 <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="type" value="language">
+                                <a class="btn btn-outline-primary btn-sm me-2" href="${pageContext.request.contextPath}/graduate/cv?action=edit&amp;type=language&amp;id=${item.language_id}">Editar</a>
+<input type="hidden" name="type" value="language">
                                 <input type="hidden" name="id" value="${item.language_id}">
                                 <button class="btn btn-outline-danger btn-sm" type="submit">
                                     <i class="fa-solid fa-trash"></i>
@@ -321,12 +338,13 @@
         <div id="collapseCerts" class="accordion-collapse collapse" data-bs-parent="#cvAccordion">
             <div class="accordion-body">
                 <form method="post" action="${pageContext.request.contextPath}/graduate/cv" class="row g-2 mb-3">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                     <input type="hidden" name="action" value="addCertification">
                     <div class="col-md-5">
                         <input class="form-control" type="text" name="name" placeholder="Nombre del certificado / curso" required>
                     </div>
                     <div class="col-md-4">
-                        <input class="form-control" type="text" name="organization" placeholder="Entidad emisora / Institución">
+                        <input class="form-control" type="text" name="organization" placeholder="Entidad emisora / Institución"><label class="form-label">Fecha de emisión</label><input class="form-control" type="date" name="issueDate">
                     </div>
                     <div class="col-md-3">
                         <button class="btn btn-success w-100 fw-bold" type="submit">
@@ -343,8 +361,10 @@
                                 <small class="text-muted d-block"><c:out value="${item.issuing_organization}"/></small>
                             </div>
                             <form method="post" action="${pageContext.request.contextPath}/graduate/cv" class="d-inline">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                                 <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="type" value="certification">
+                                <a class="btn btn-outline-primary btn-sm me-2" href="${pageContext.request.contextPath}/graduate/cv?action=edit&amp;type=certification&amp;id=${item.certification_id}">Editar</a>
+<input type="hidden" name="type" value="certification">
                                 <input type="hidden" name="id" value="${item.certification_id}">
                                 <button class="btn btn-outline-danger btn-sm" type="submit">
                                     <i class="fa-solid fa-trash"></i>
@@ -367,6 +387,7 @@
         <div id="collapseRefs" class="accordion-collapse collapse" data-bs-parent="#cvAccordion">
             <div class="accordion-body">
                 <form method="post" action="${pageContext.request.contextPath}/graduate/cv" class="row g-2 mb-3">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                     <input type="hidden" name="action" value="addReference">
                     <div class="col-md-4">
                         <input class="form-control" type="text" name="fullName" placeholder="Nombre completo de la referencia" required>
@@ -398,8 +419,10 @@
                                 <small class="text-secondary d-block"><i class="fa-solid fa-phone me-1"></i> <c:out value="${item.phone}"/> | <i class="fa-solid fa-envelope me-1"></i> <c:out value="${item.email}"/></small>
                             </div>
                             <form method="post" action="${pageContext.request.contextPath}/graduate/cv" class="d-inline confirm-action">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                                 <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="type" value="reference">
+                                <a class="btn btn-outline-primary btn-sm me-2" href="${pageContext.request.contextPath}/graduate/cv?action=edit&amp;type=reference&amp;id=${item.reference_id}">Editar</a>
+<input type="hidden" name="type" value="reference">
                                 <input type="hidden" name="id" value="${item.reference_id}">
                                 <button class="btn btn-outline-danger btn-sm" type="submit">
                                     <i class="fa-solid fa-trash"></i>

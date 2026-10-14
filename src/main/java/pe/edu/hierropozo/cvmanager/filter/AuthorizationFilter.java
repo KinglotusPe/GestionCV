@@ -18,7 +18,6 @@ import java.io.IOException;
  * /company/*  -> role: company
  * /admin/*    -> role: admin
  */
-@WebFilter(urlPatterns = {"/graduate/*", "/company/*", "/admin/*"})
 public class AuthorizationFilter implements Filter {
 
     @Override

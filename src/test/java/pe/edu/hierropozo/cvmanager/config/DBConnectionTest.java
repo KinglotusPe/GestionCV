@@ -17,6 +17,7 @@ import pe.edu.hierropozo.cvmanager.model.Career;
  * Prueba de integración JDBC para verificar conectividad con MySQL 8
  * y persistencia en la tabla 'carreras'.
  */
+@org.junit.jupiter.api.Tag("integration")
 class DBConnectionTest {
 
     @Test

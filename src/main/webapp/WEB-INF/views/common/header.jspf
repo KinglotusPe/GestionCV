@@ -50,7 +50,7 @@
                         </li>
                     </c:when>
                     <c:otherwise>
-                        <c:if test="${sessionScope.role == 'graduate'}">
+                        <c:if test="${sessionScope.role == 'graduate'}"><li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/graduate/jobs">Vacantes</a></li><li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/graduate/requests">Propuestas</a></li>
                             <li class="nav-item">
                                 <a class="nav-link" href="${pageContext.request.contextPath}/graduate/profile">
                                     <i class="fa-solid fa-id-card me-1"></i> Mi Perfil
@@ -62,7 +62,7 @@
                                 </a>
                             </li>
                         </c:if>
-                        <c:if test="${sessionScope.role == 'company'}">
+                        <c:if test="${sessionScope.role == 'company'}"><li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/company/jobs">Vacantes</a></li><li class="nav-item"><a class="nav-link" href="${pageContext.request.contextPath}/company/profile">Mi empresa</a></li>
                             <li class="nav-item">
                                 <a class="nav-link" href="${pageContext.request.contextPath}/company/search">
                                     <i class="fa-solid fa-magnifying-glass me-1"></i> Buscar Egresados
@@ -97,9 +97,9 @@
                             </li>
                         </c:if>
                         <li class="nav-item ms-lg-3">
-                            <a class="btn btn-outline-light btn-sm" href="${pageContext.request.contextPath}/logout">
-                                <i class="fa-solid fa-right-from-bracket me-1"></i> Cerrar Sesión
-                            </a>
+                            <a class="nav-link" href="${pageContext.request.contextPath}/account">Mi cuenta</a>
+                            <form method="post" action="${pageContext.request.contextPath}/logout">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}"><button class="btn btn-outline-light btn-sm" type="submit">Cerrar sesión</button></form>
                         </li>
                     </c:otherwise>
                 </c:choose>

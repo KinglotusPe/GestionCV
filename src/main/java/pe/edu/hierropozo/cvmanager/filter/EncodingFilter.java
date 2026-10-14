@@ -12,7 +12,6 @@ import java.io.IOException;
  * Filtro de codificación de caracteres.
  * Establece UTF-8 en todas las solicitudes y respuestas de la aplicación.
  */
-@WebFilter("/*")
 public class EncodingFilter implements Filter {
 
     @Override

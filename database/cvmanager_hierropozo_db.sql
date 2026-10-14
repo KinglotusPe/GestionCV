@@ -5,14 +5,13 @@
 -- MOTOR: MySQL 8.0+ | CHARSET: utf8mb4 | COLLATION: utf8mb4_unicode_ci
 -- ============================================================================
 
-DROP DATABASE IF EXISTS cvmanager_hierropozo_db;
-CREATE DATABASE cvmanager_hierropozo_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS cvmanager_hierropozo_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE cvmanager_hierropozo_db;
 
 -- ----------------------------------------------------------------------------
 -- 1. TABLA: carreras (Programas de Estudio Oficiales)
 -- ----------------------------------------------------------------------------
-CREATE TABLE carreras (
+CREATE TABLE IF NOT EXISTS carreras (
     career_id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(120) NOT NULL UNIQUE,
     code VARCHAR(20) NOT NULL UNIQUE,
@@ -24,7 +23,7 @@ CREATE TABLE carreras (
 -- ----------------------------------------------------------------------------
 -- 2. TABLA: usuarios (Credenciales, Roles y Estados)
 -- ----------------------------------------------------------------------------
-CREATE TABLE usuarios (
+CREATE TABLE IF NOT EXISTS usuarios (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(150) NOT NULL UNIQUE,
     password_hash VARCHAR(100) NOT NULL,
@@ -39,7 +38,7 @@ CREATE TABLE usuarios (
 -- ----------------------------------------------------------------------------
 -- 3. TABLA: egresados (Datos Personales y Académicos)
 -- ----------------------------------------------------------------------------
-CREATE TABLE egresados (
+CREATE TABLE IF NOT EXISTS egresados (
     graduate_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL UNIQUE,
     first_name VARCHAR(80) NOT NULL,
@@ -66,7 +65,7 @@ CREATE TABLE egresados (
 -- ----------------------------------------------------------------------------
 -- 4. TABLA: empresas (Datos Corporativos y Empleadores)
 -- ----------------------------------------------------------------------------
-CREATE TABLE empresas (
+CREATE TABLE IF NOT EXISTS empresas (
     company_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL UNIQUE,
     company_name VARCHAR(150) NOT NULL,
@@ -83,7 +82,7 @@ CREATE TABLE empresas (
 -- ----------------------------------------------------------------------------
 -- 5. TABLA: cv (Cabecera del Currículum Vitae)
 -- ----------------------------------------------------------------------------
-CREATE TABLE cv (
+CREATE TABLE IF NOT EXISTS cv (
     cv_id INT AUTO_INCREMENT PRIMARY KEY,
     graduate_id INT NOT NULL UNIQUE,
     title VARCHAR(150) NOT NULL DEFAULT 'Mi Currículum Vitae',
@@ -100,7 +99,7 @@ CREATE TABLE cv (
 -- ----------------------------------------------------------------------------
 -- 6. TABLA: educacion (Historial de Estudios del Egresado)
 -- ----------------------------------------------------------------------------
-CREATE TABLE educacion (
+CREATE TABLE IF NOT EXISTS educacion (
     education_id INT AUTO_INCREMENT PRIMARY KEY,
     cv_id INT NOT NULL,
     institution VARCHAR(150) NOT NULL,
@@ -117,7 +116,7 @@ CREATE TABLE educacion (
 -- ----------------------------------------------------------------------------
 -- 7. TABLA: experiencia (Trayectoria Laboral del Egresado)
 -- ----------------------------------------------------------------------------
-CREATE TABLE experiencia (
+CREATE TABLE IF NOT EXISTS experiencia (
     experience_id INT AUTO_INCREMENT PRIMARY KEY,
     cv_id INT NOT NULL,
     company_name VARCHAR(150) NOT NULL,
@@ -134,7 +133,7 @@ CREATE TABLE experiencia (
 -- ----------------------------------------------------------------------------
 -- 8. TABLA: habilidades (Competencias Técnicas y Blandas)
 -- ----------------------------------------------------------------------------
-CREATE TABLE habilidades (
+CREATE TABLE IF NOT EXISTS habilidades (
     skill_id INT AUTO_INCREMENT PRIMARY KEY,
     cv_id INT NOT NULL,
     skill_name VARCHAR(100) NOT NULL,
@@ -147,7 +146,7 @@ CREATE TABLE habilidades (
 -- ----------------------------------------------------------------------------
 -- 9. TABLA: idiomas (Dominio de Lenguas)
 -- ----------------------------------------------------------------------------
-CREATE TABLE idiomas (
+CREATE TABLE IF NOT EXISTS idiomas (
     language_id INT AUTO_INCREMENT PRIMARY KEY,
     cv_id INT NOT NULL,
     language_name VARCHAR(80) NOT NULL,
@@ -159,7 +158,7 @@ CREATE TABLE idiomas (
 -- ----------------------------------------------------------------------------
 -- 10. TABLA: certificaciones (Cursos y Diplomas Adicionales)
 -- ----------------------------------------------------------------------------
-CREATE TABLE certificaciones (
+CREATE TABLE IF NOT EXISTS certificaciones (
     certification_id INT AUTO_INCREMENT PRIMARY KEY,
     cv_id INT NOT NULL,
     name VARCHAR(150) NOT NULL,
@@ -174,7 +173,7 @@ CREATE TABLE certificaciones (
 -- ----------------------------------------------------------------------------
 -- 11. TABLA: referencias (Contactos Profesionales de Recomendación)
 -- ----------------------------------------------------------------------------
-CREATE TABLE referencias (
+CREATE TABLE IF NOT EXISTS referencias (
     reference_id INT AUTO_INCREMENT PRIMARY KEY,
     cv_id INT NOT NULL,
     full_name VARCHAR(150) NOT NULL,
@@ -188,7 +187,7 @@ CREATE TABLE referencias (
 -- ----------------------------------------------------------------------------
 -- 12. TABLA: favoritos (Candidatos Guardados por Empresas)
 -- ----------------------------------------------------------------------------
-CREATE TABLE favoritos (
+CREATE TABLE IF NOT EXISTS favoritos (
     favorite_id INT AUTO_INCREMENT PRIMARY KEY,
     company_id INT NOT NULL,
     cv_id INT NOT NULL,
@@ -201,7 +200,7 @@ CREATE TABLE favoritos (
 -- ----------------------------------------------------------------------------
 -- 13. TABLA: solicitudes_contacto (Comunicación Empresa -> Egresado)
 -- ----------------------------------------------------------------------------
-CREATE TABLE solicitudes_contacto (
+CREATE TABLE IF NOT EXISTS solicitudes_contacto (
     request_id INT AUTO_INCREMENT PRIMARY KEY,
     company_id INT NOT NULL,
     graduate_id INT NOT NULL,
@@ -215,7 +214,7 @@ CREATE TABLE solicitudes_contacto (
 -- ----------------------------------------------------------------------------
 -- 14. TABLA: busquedas e historial de visualizaciones
 -- ----------------------------------------------------------------------------
-CREATE TABLE busquedas (
+CREATE TABLE IF NOT EXISTS busquedas (
     search_id INT AUTO_INCREMENT PRIMARY KEY,
     company_id INT NOT NULL,
     criteria VARCHAR(500),
@@ -223,7 +222,7 @@ CREATE TABLE busquedas (
     CONSTRAINT fk_search_company FOREIGN KEY (company_id) REFERENCES empresas(company_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE historial_visualizaciones (
+CREATE TABLE IF NOT EXISTS historial_visualizaciones (
     view_id INT AUTO_INCREMENT PRIMARY KEY,
     company_id INT NOT NULL,
     cv_id INT NOT NULL,
@@ -235,7 +234,7 @@ CREATE TABLE historial_visualizaciones (
 -- ----------------------------------------------------------------------------
 -- 15. TABLA: logs_auditoria (Bitácora de Trazabilidad)
 -- ----------------------------------------------------------------------------
-CREATE TABLE logs_auditoria (
+CREATE TABLE IF NOT EXISTS logs_auditoria (
     log_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NULL,
     action VARCHAR(100) NOT NULL,
@@ -256,4 +255,42 @@ INSERT INTO carreras (name, code, description, duration_years, is_active) VALUES
 ('Administración de Redes y Comunicaciones', 'ARC', 'Gestión, administración y seguridad de infraestructuras y telecomunicaciones', 3, TRUE),
 ('Electricidad Industrial', 'EI', 'Automatización, control eléctrico industrial y sistemas de potencia', 3, TRUE),
 ('Gestión Administrativa', 'GA', 'Administración empresarial, contabilidad, logística y talento humano', 3, TRUE),
-('Mecatrónica Automotriz', 'MA', 'Diagnóstico electrónico, sistemas automotrices y mantenimiento electromecánico', 3, TRUE);
+('Mecatrónica Automotriz', 'MA', 'Diagnóstico electrónico, sistemas automotrices y mantenimiento electromecánico', 3, TRUE) ON DUPLICATE KEY UPDATE code=VALUES(code);
+
+CREATE TABLE IF NOT EXISTS password_resets (
+ token_hash CHAR(64) PRIMARY KEY,
+ user_id INT NOT NULL,
+ expires_at TIMESTAMP NOT NULL,
+ UNIQUE KEY uk_reset_user(user_id),
+ CONSTRAINT fk_reset_user FOREIGN KEY(user_id) REFERENCES usuarios(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS vacantes (
+ job_id INT AUTO_INCREMENT PRIMARY KEY,
+ company_id INT NOT NULL,
+ career_id INT NULL,
+ title VARCHAR(150) NOT NULL,
+ description TEXT NOT NULL,
+ city VARCHAR(80) NOT NULL,
+ modality ENUM('onsite','remote','hybrid') NOT NULL,
+ salary VARCHAR(100),
+ status ENUM('open','closed') NOT NULL DEFAULT 'open',
+ closing_date DATE NULL,
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ CONSTRAINT fk_job_company FOREIGN KEY(company_id) REFERENCES empresas(company_id) ON DELETE CASCADE,
+ CONSTRAINT fk_job_career FOREIGN KEY(career_id) REFERENCES carreras(career_id) ON DELETE SET NULL,
+ INDEX idx_job_status(status,closing_date)
+) ENGINE=InnoDB;
+CREATE TABLE IF NOT EXISTS postulaciones (
+ application_id INT AUTO_INCREMENT PRIMARY KEY,
+ job_id INT NOT NULL,
+ graduate_id INT NOT NULL,
+ message TEXT NOT NULL,
+ status ENUM('pending','reviewing','accepted','rejected','withdrawn') NOT NULL DEFAULT 'pending',
+ created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ UNIQUE KEY uk_job_graduate(job_id,graduate_id),
+ CONSTRAINT fk_application_job FOREIGN KEY(job_id) REFERENCES vacantes(job_id) ON DELETE CASCADE,
+ CONSTRAINT fk_application_graduate FOREIGN KEY(graduate_id) REFERENCES egresados(graduate_id) ON DELETE CASCADE
+) ENGINE=InnoDB;

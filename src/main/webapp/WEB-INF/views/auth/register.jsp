@@ -15,6 +15,7 @@
             </div>
 
             <form method="post" action="${pageContext.request.contextPath}/register">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                 <!-- Tipo de Rol -->
                 <div class="mb-3">
                     <label class="form-label fw-bold">Tipo de Cuenta / Rol</label>

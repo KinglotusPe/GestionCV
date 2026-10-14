@@ -26,7 +26,9 @@ public class AdminService {
             {"graduates", "SELECT COUNT(*) FROM egresados"},
             {"companies", "SELECT COUNT(*) FROM empresas"},
             {"published", "SELECT COUNT(*) FROM cv WHERE is_published = 1"},
-            {"pending", "SELECT COUNT(*) FROM usuarios WHERE status = 'pending'"}
+            {"pending", "SELECT COUNT(*) FROM usuarios WHERE status = 'pending'"},
+            {"jobs", "SELECT COUNT(*) FROM vacantes WHERE status = 'open' AND (closing_date IS NULL OR closing_date>=CURRENT_DATE)"},
+            {"applications", "SELECT COUNT(*) FROM postulaciones WHERE status<>'withdrawn'"}
         };
 
         try (Connection connection = DBConnection.getConnection();

@@ -16,6 +16,7 @@
     </h5>
 
     <form method="post" action="${pageContext.request.contextPath}/admin/careers" class="row g-3">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
         <input type="hidden" name="action" value="create">
 
         <div class="col-md-4">
@@ -85,9 +86,18 @@
                                 </c:otherwise>
                             </c:choose>
                         </td>
-                        <td class="text-end">
+                        <td class="text-end"><details><summary class="btn btn-outline-primary btn-sm">Editar</summary>
+<form method="post" action="${pageContext.request.contextPath}/admin/careers" class="text-start mt-2">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
+<input type="hidden" name="action" value="update"><input type="hidden" name="id" value="${c.careerId}">
+<label>Nombre</label><input class="form-control mb-2" name="name" maxlength="120" required value="<c:out value='${c.name}'/>">
+<label>Código</label><input class="form-control mb-2" name="code" maxlength="20" required value="<c:out value='${c.code}'/>">
+<label>Descripción</label><input class="form-control mb-2" name="description" maxlength="255" value="<c:out value='${c.description}'/>">
+<label>Duración en años</label><input class="form-control mb-2" type="number" name="durationYears" min="1" max="10" required value="${c.durationYears}">
+<label><input type="checkbox" name="active" ${c.active ? 'checked' : ''}> Activa</label><button class="btn btn-success btn-sm">Guardar</button></form></details>
                             <c:if test="${c.active}">
                                 <form method="post" action="${pageContext.request.contextPath}/admin/careers" class="d-inline confirm-action">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                                     <input type="hidden" name="action" value="delete">
                                     <input type="hidden" name="id" value="${c.careerId}">
                                     <button class="btn btn-sm btn-outline-danger" type="submit">

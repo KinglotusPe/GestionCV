@@ -11,6 +11,7 @@
             </h3>
 
             <form method="post" action="${pageContext.request.contextPath}/graduate/profile">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Nombres</label>
@@ -54,7 +55,7 @@
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="form-label fw-bold">Año de Graduación</label>
-                        <input class="form-control" type="number" name="graduationYear" value="${graduate.graduationYear}" min="1990" max="2030">
+                        <input class="form-control" type="number" name="graduationYear" value="${graduate.graduationYear}" min="1950" max="2100">
                     </div>
                 </div>
 
@@ -112,7 +113,9 @@
                     <c:when test="${not empty graduate.photoUrl}">
                         <div class="alert alert-info py-2 small">
                             <i class="fa-solid fa-check me-1"></i> Foto registrada: <br>
-                            <code><c:out value="${graduate.photoUrl}"/></code>
+                            <img class="rounded img-fluid" style="max-height:220px" alt="Foto de perfil" src="${pageContext.request.contextPath}/files?type=photo&amp;cvId=${cv.cvId}">
+                            <form method="post" action="${pageContext.request.contextPath}/graduate/upload">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}"><input type="hidden" name="type" value="photo"><button class="btn btn-outline-danger btn-sm mt-2" name="action" value="remove">Eliminar foto</button></form>
                         </div>
                     </c:when>
                     <c:otherwise>
@@ -125,6 +128,7 @@
             </div>
 
             <form method="post" action="${pageContext.request.contextPath}/graduate/upload" enctype="multipart/form-data">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                 <input type="hidden" name="type" value="photo">
                 <div class="mb-3 text-start">
                     <label class="form-label small fw-bold">Seleccionar imagen (JPG o PNG):</label>

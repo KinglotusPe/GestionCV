@@ -76,12 +76,17 @@ public class RegistrationService {
      */
     public void createAdmin(String email, String password) throws Exception {
         try (Connection connection = DBConnection.getConnection()) {
-            User admin = new User();
-            admin.setEmail(email);
-            admin.setPasswordHash(PasswordUtil.hash(password));
-            admin.setRole("admin");
-            admin.setStatus("active");
-            userDAO.create(connection, admin);
+            try (PreparedStatement lock=connection.prepareStatement("SELECT GET_LOCK('cvmanager_initial_admin',10)"); java.sql.ResultSet rs=lock.executeQuery()) {
+                if(!rs.next() || rs.getInt(1)!=1)throw new IllegalStateException("La configuración está en curso. Intente nuevamente.");
+            }
+            try {
+                try(PreparedStatement st=connection.prepareStatement("SELECT 1 FROM usuarios WHERE role='admin' LIMIT 1"); java.sql.ResultSet rs=st.executeQuery()) {
+                    if(rs.next())throw new IllegalArgumentException("Ya existe un administrador.");
+                }
+                User admin=new User();admin.setEmail(email);admin.setPasswordHash(PasswordUtil.hash(password));admin.setRole("admin");admin.setStatus("active");userDAO.create(connection,admin);
+            } finally {
+                try(PreparedStatement unlock=connection.prepareStatement("SELECT RELEASE_LOCK('cvmanager_initial_admin')")){unlock.execute();}
+            }
         }
     }
 }

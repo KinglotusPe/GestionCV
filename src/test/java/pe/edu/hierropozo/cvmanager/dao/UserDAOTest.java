@@ -12,6 +12,7 @@ import pe.edu.hierropozo.cvmanager.model.User;
 /**
  * Prueba de integración para UserDAO.
  */
+@org.junit.jupiter.api.Tag("integration")
 class UserDAOTest {
 
     private final UserDAO userDAO = new UserDAOImpl();

@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import pe.edu.hierropozo.cvmanager.util.ValidationUtil;
 import pe.edu.hierropozo.cvmanager.dao.CareerDAO;
 import pe.edu.hierropozo.cvmanager.dao.CareerDAOImpl;
 import pe.edu.hierropozo.cvmanager.model.Career;
@@ -41,6 +42,7 @@ public class AdminCareersServlet extends HttpServlet {
 
         try {
             String action = request.getParameter("action");
+            if(action==null || !java.util.Set.of("create","update","delete").contains(action))throw new IllegalArgumentException("Acción inválida.");
 
             if ("delete".equals(action)) {
                 int careerId = Integer.parseInt(request.getParameter("id"));
@@ -52,10 +54,10 @@ public class AdminCareersServlet extends HttpServlet {
                     career.setCareerId(Integer.parseInt(idParam.trim()));
                 }
 
-                career.setName(request.getParameter("name"));
-                career.setCode(request.getParameter("code"));
-                career.setDescription(request.getParameter("description"));
-                career.setDurationYears(Integer.parseInt(request.getParameter("durationYears")));
+                career.setName(ValidationUtil.text(request.getParameter("name"),"Name",120,true));
+                career.setCode(ValidationUtil.text(request.getParameter("code"),"Code",20,true));
+                career.setDescription(ValidationUtil.text(request.getParameter("description"),"Description",255,false));
+                career.setDurationYears(ValidationUtil.integer(request.getParameter("durationYears"),"Duración",1,10));
                 career.setActive(request.getParameter("active") != null);
 
                 if ("create".equals(action)) {

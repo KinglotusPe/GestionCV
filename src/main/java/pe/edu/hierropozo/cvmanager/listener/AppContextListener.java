@@ -32,6 +32,15 @@ public class AppContextListener implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent event) {
+        DBConnection.close();
+        com.mysql.cj.jdbc.AbandonedConnectionCleanupThread.checkedShutdown();
+        java.util.Enumeration<java.sql.Driver> drivers=java.sql.DriverManager.getDrivers();
+        while(drivers.hasMoreElements()) {
+            java.sql.Driver driver=drivers.nextElement();
+            if(driver.getClass().getClassLoader()==getClass().getClassLoader()) {
+                try {java.sql.DriverManager.deregisterDriver(driver);} catch(java.sql.SQLException e){event.getServletContext().log("No se pudo liberar el driver",e);}
+            }
+        }
         event.getServletContext().log("CVManager Hierro Pozo: Deteniendo contexto de la aplicación.");
     }
 }

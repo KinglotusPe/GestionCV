@@ -8,7 +8,7 @@
         <div class="card p-4 p-md-5 shadow-sm">
             <div class="d-flex align-items-center gap-3 pb-3 border-bottom mb-4">
                 <div class="bg-light p-3 rounded-circle text-success">
-                    <i class="fa-solid fa-user-graduate fa-2x"></i>
+                    <c:choose><c:when test="${not empty graduate.photoUrl}"><img class="rounded-circle" width="80" height="80" style="object-fit:cover" alt="Foto del candidato" src="${pageContext.request.contextPath}/files?type=photo&amp;cvId=${cv.cvId}"></c:when><c:otherwise><i class="fa-solid fa-user-graduate fa-2x"></i></c:otherwise></c:choose>
                 </div>
                 <div>
                     <h2 class="fw-bold mb-1"><c:out value="${graduate.fullName}"/></h2>
@@ -103,8 +103,9 @@
                 </div>
             </c:if>
 
+            <c:if test="${not empty cv.cvPdfUrl}"><c:choose><c:when test="${contactAccepted}"><a class="btn btn-outline-primary mb-3" href="${pageContext.request.contextPath}/files?type=pdf&amp;cvId=${cv.cvId}">Descargar CV en PDF</a></c:when><c:otherwise><p class="text-muted">El PDF estará disponible cuando el candidato acepte su solicitud.</p></c:otherwise></c:choose></c:if>
             <!-- Referencias Profesionales -->
-            <c:if test="${not empty references}">
+            <c:if test="${not empty references and contactAccepted}">
                 <div class="mb-4">
                     <h5 class="cv-section"><i class="fa-solid fa-user-check me-2"></i> Referencias Profesionales</h5>
                     <div class="row g-2">
@@ -137,12 +138,13 @@
             </p>
 
             <form method="post" action="${pageContext.request.contextPath}/company/action">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                 <input type="hidden" name="action" value="contact">
                 <input type="hidden" name="graduateId" value="${graduate.graduateId}">
                 
                 <div class="mb-3">
                     <label class="form-label small fw-bold">Mensaje de propuesta</label>
-                    <textarea class="form-control" name="message" rows="4" placeholder="Estimado/a ${graduate.firstName}, nos interesa su perfil técnico para..." required></textarea>
+                    <textarea class="form-control" name="message" rows="4" placeholder="Estimado/a <c:out value='${graduate.firstName}'/>, nos interesa su perfil técnico para..." required></textarea>
                 </div>
 
                 <button class="btn btn-success w-100 fw-bold" type="submit">

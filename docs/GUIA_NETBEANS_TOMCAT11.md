@@ -1,13 +1,15 @@
-# Guía NetBeans + Tomcat 11
-1. Instala JDK 17 o superior.
-2. Descarga y descomprime Apache Tomcat 11.
-3. NetBeans: **Tools > Servers > Add Server > Apache Tomcat or TomEE**.
-4. Selecciona la carpeta de Tomcat 11 y configura credenciales si NetBeans las solicita.
-5. Abre este proyecto Maven con **File > Open Project**.
-6. Revisa `database.properties`.
-7. Ejecuta el SQL de `/database`.
-8. Haz **Clean and Build**.
-9. Ejecuta el proyecto y confirma el contexto `/cvmanager`.
-10. Crea el administrador en `/setup-admin`.
+# NetBeans y Tomcat 11
 
-Si NetBeans intenta usar otro servidor: clic derecho al proyecto > **Properties > Run > Server** y selecciona Tomcat 11.
+1. Registrar un JDK 17 o superior y Tomcat 11 en NetBeans, en Tools → Servers.
+2. Abrir esta carpeta como proyecto Maven.
+3. Preparar MySQL: instalación nueva con `database/cvmanager_hierropozo_db.sql`; instalación existente con los dos archivos de `database/migrations`, en orden, después de respaldar.
+4. Configurar `CVMANAGER_DB_URL`, `CVMANAGER_DB_USER`, `CVMANAGER_DB_PASSWORD` y `CVMANAGER_UPLOAD_DIR` en el entorno del proceso de Tomcat. También puede usar `database.properties` para la conexión local.
+5. Para la primera instalación, establecer `CVMANAGER_SETUP_TOKEN` con una clave aleatoria de al menos 24 caracteres. Si NetBeans inicia Tomcat, NetBeans debe heredar estas variables: cerrarlo y abrirlo desde el entorno configurado.
+6. En Properties → Run, seleccionar Tomcat 11 y el contexto `/cvmanager`.
+7. Ejecutar Clean and Build. Las pruebas unitarias no necesitan MySQL.
+8. Ejecutar el proyecto y abrir `/cvmanager/setup-admin`. Introducir la clave de instalación y crear el administrador. Si ya existe uno, usar `/cvmanager/login`.
+9. Desde Usuarios, activar egresados y empresas pendientes. La gestión incluye roles, estados y enlaces de recuperación.
+
+El WAR se genera en `target/cvmanager.war`. Guardar la carpeta de archivos fuera del despliegue evita perder fotos y PDF al actualizarlo.
+
+Para validar también la persistencia, ejecutar `mvn -Pintegration verify` apuntando a una base aislada cuyo nombre termine en `_test`. El README detalla las variables, migraciones y pruebas HTTP.

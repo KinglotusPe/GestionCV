@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import pe.edu.hierropozo.cvmanager.service.CVSectionService;
+import pe.edu.hierropozo.cvmanager.util.ValidationUtil;
 import pe.edu.hierropozo.cvmanager.dao.CurriculumDAO;
 import pe.edu.hierropozo.cvmanager.dao.CurriculumDAOImpl;
 import pe.edu.hierropozo.cvmanager.dao.GraduateDAO;
@@ -39,6 +41,17 @@ public class CVServlet extends HttpServlet {
         try {
             Curriculum curriculum = loadCurriculum(request);
 
+            if ("edit".equals(request.getParameter("action"))) {
+                String type=request.getParameter("type");
+                var definition=CVSectionService.definition(type);
+                int id=Integer.parseInt(request.getParameter("id"));
+                var item=curriculumDAO.section(definition.table(),"cv_id",curriculum.getCvId()).stream()
+                    .filter(row -> ((Number)row.get(definition.id())).intValue()==id).findFirst();
+                if(item.isEmpty()){response.sendError(404);return;}
+                request.setAttribute("item",item.get());request.setAttribute("type",type);request.setAttribute("itemId",id);
+                request.setAttribute("pageTitle","Editar sección del CV");
+                request.getRequestDispatcher("/WEB-INF/views/graduate/edit-section.jsp").forward(request,response);return;
+            }
             request.setAttribute("cv", curriculum);
             request.setAttribute("education", curriculumDAO.section("educacion", "cv_id", curriculum.getCvId()));
             request.setAttribute("experience", curriculumDAO.section("experiencia", "cv_id", curriculum.getCvId()));
@@ -70,18 +83,19 @@ public class CVServlet extends HttpServlet {
 
             switch (action) {
                 case "main" -> {
-                    curriculum.setTitle(request.getParameter("title"));
-                    curriculum.setProfessionalSummary(request.getParameter("summary"));
+                    curriculum.setTitle(ValidationUtil.text(request.getParameter("title"),"Título",150,true));
+                    curriculum.setProfessionalSummary(ValidationUtil.text(request.getParameter("summary"),"Resumen",10000,true));
                     curriculumDAO.updateMain(curriculum);
                 }
                 case "publish" -> curriculumDAO.setPublished(curriculum.getCvId(), true);
                 case "unpublish" -> curriculumDAO.setPublished(curriculum.getCvId(), false);
-                case "addEducation" -> curriculumDAO.addEducation(curriculum.getCvId(), params);
-                case "addExperience" -> curriculumDAO.addExperience(curriculum.getCvId(), params);
-                case "addSkill" -> curriculumDAO.addSkill(curriculum.getCvId(), params);
-                case "addLanguage" -> curriculumDAO.addLanguage(curriculum.getCvId(), params);
-                case "addCertification" -> curriculumDAO.addCertification(curriculum.getCvId(), params);
-                case "addReference" -> curriculumDAO.addReference(curriculum.getCvId(), params);
+                case "addEducation" -> new CVSectionService().save(curriculum.getCvId(), "education", null, params);
+                case "addExperience" -> new CVSectionService().save(curriculum.getCvId(), "experience", null, params);
+                case "addSkill" -> new CVSectionService().save(curriculum.getCvId(), "skill", null, params);
+                case "addLanguage" -> new CVSectionService().save(curriculum.getCvId(), "language", null, params);
+                case "addCertification" -> new CVSectionService().save(curriculum.getCvId(), "certification", null, params);
+                case "addReference" -> new CVSectionService().save(curriculum.getCvId(), "reference", null, params);
+                case "update" -> new CVSectionService().save(curriculum.getCvId(), request.getParameter("type"), Integer.valueOf(request.getParameter("id")), params);
                 case "delete" -> {
                     String sectionType = request.getParameter("type");
                     int itemId = Integer.parseInt(request.getParameter("id"));

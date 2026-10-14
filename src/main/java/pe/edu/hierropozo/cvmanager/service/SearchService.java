@@ -19,15 +19,15 @@ public class SearchService {
     /**
      * Realiza búsquedas parametrizadas directamente en MySQL con paginación.
      */
-    public List<Map<String, Object>> search(String query, String careerId, String skill, String city, int page, int pageSize) throws Exception {
+    public List<Map<String, Object>> search(String query, String careerId, String skill, String city, String year, int page, int pageSize) throws Exception {
         StringBuilder sql = new StringBuilder(
             "SELECT DISTINCT cv.cv_id, g.graduate_id, g.first_name, g.last_name, g.city, " +
-            "c.name AS career, cv.title, cv.professional_summary, cv.views_count " +
+            "c.name AS career, cv.title, cv.professional_summary, cv.views_count, cv.updated_at " +
             "FROM cv " +
             "JOIN egresados g ON g.graduate_id = cv.graduate_id " +
             "LEFT JOIN carreras c ON c.career_id = g.career_id " +
             "LEFT JOIN habilidades h ON h.cv_id = cv.cv_id " +
-            "WHERE cv.is_published = 1 AND g.is_public = 1"
+            "JOIN usuarios u ON u.user_id = g.user_id WHERE u.status = 'active' AND u.role = 'graduate' AND cv.is_published = 1 AND g.is_public = 1"
         );
 
         List<Object> parameters = new ArrayList<>();
@@ -56,8 +56,11 @@ public class SearchService {
             parameters.add("%" + city.trim() + "%");
         }
 
-        sql.append(" ORDER BY cv.updated_at DESC LIMIT ? OFFSET ?");
-        parameters.add(pageSize);
+        if(year!=null&&!year.isBlank()) {
+            sql.append(" AND g.graduation_year = ?");parameters.add(pe.edu.hierropozo.cvmanager.util.ValidationUtil.integer(year,"Año de graduación",1950,2100));
+        }
+        sql.append(" ORDER BY cv.updated_at DESC, cv.cv_id DESC LIMIT ? OFFSET ?");
+        parameters.add(pageSize + 1);
         parameters.add((page - 1) * pageSize);
 
         try (Connection connection = DBConnection.getConnection();
@@ -89,7 +92,9 @@ public class SearchService {
      */
     public void favorite(int userId, int cvId) throws Exception {
         String sql = "INSERT IGNORE INTO favoritos(company_id, cv_id) " +
-                     "SELECT company_id, ? FROM empresas WHERE user_id = ?";
+                     "SELECT emp.company_id, cv.cv_id FROM empresas emp CROSS JOIN cv " +
+                     "JOIN egresados g ON g.graduate_id = cv.graduate_id JOIN usuarios u ON u.user_id = g.user_id " +
+                     "WHERE cv.cv_id = ? AND emp.user_id = ? AND cv.is_published = 1 AND g.is_public = 1 AND u.status = 'active' AND u.role = 'graduate'";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -111,7 +116,7 @@ public class SearchService {
                      "JOIN cv ON cv.cv_id = f.cv_id " +
                      "JOIN egresados g ON g.graduate_id = cv.graduate_id " +
                      "LEFT JOIN carreras c ON c.career_id = g.career_id " +
-                     "WHERE emp.user_id = ? " +
+                     "WHERE emp.user_id = ? AND cv.is_published = 1 AND g.is_public = 1 AND EXISTS (SELECT 1 FROM usuarios u WHERE u.user_id = g.user_id AND u.status = 'active' AND u.role = 'graduate') " +
                      "ORDER BY f.created_at DESC";
 
         try (Connection connection = DBConnection.getConnection();
@@ -156,16 +161,19 @@ public class SearchService {
      * Registra una solicitud de contacto de la empresa hacia un egresado.
      */
     public void requestContact(int userId, int graduateId, String message) throws Exception {
+        message = pe.edu.hierropozo.cvmanager.util.ValidationUtil.text(message, "Mensaje", 5000, true);
         String sql = "INSERT INTO solicitudes_contacto(company_id, graduate_id, message) " +
-                     "SELECT company_id, ?, ? FROM empresas WHERE user_id = ?";
+                     "SELECT emp.company_id, g.graduate_id, ? FROM empresas emp CROSS JOIN egresados g " +
+                     "JOIN cv ON cv.graduate_id = g.graduate_id JOIN usuarios u ON u.user_id = g.user_id " +
+                     "WHERE g.graduate_id = ? AND emp.user_id = ? AND cv.is_published = 1 AND g.is_public = 1 AND u.status = 'active' AND u.role = 'graduate'";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
 
-            statement.setInt(1, graduateId);
-            statement.setString(2, message);
+            statement.setString(1, message);
+            statement.setInt(2, graduateId);
             statement.setInt(3, userId);
-            statement.executeUpdate();
+            if (statement.executeUpdate() != 1) throw new IllegalArgumentException("El candidato no está disponible para contacto.");
         }
     }
 
@@ -174,7 +182,7 @@ public class SearchService {
      */
     public List<Map<String, Object>> getContactRequests(int userId) throws Exception {
         String sql = "SELECT sc.request_id, sc.message, sc.status, sc.created_at, " +
-                     "g.first_name, g.last_name, g.phone, u.email AS graduate_email, c.name AS career " +
+                     "g.first_name, g.last_name, CASE WHEN sc.status = 'accepted' AND u.status = 'active' AND u.role = 'graduate' THEN g.phone END AS phone, CASE WHEN sc.status = 'accepted' AND u.status = 'active' AND u.role = 'graduate' THEN u.email END AS graduate_email, c.name AS career " +
                      "FROM solicitudes_contacto sc " +
                      "JOIN empresas emp ON emp.company_id = sc.company_id " +
                      "JOIN egresados g ON g.graduate_id = sc.graduate_id " +
@@ -219,7 +227,7 @@ public class SearchService {
                     insertStmt.executeUpdate();
                 }
 
-                String sqlUpdate = "UPDATE cv SET views_count = views_count + 1 WHERE cv_id = ?";
+                String sqlUpdate = "UPDATE cv SET views_count = views_count + 1, updated_at = updated_at WHERE cv_id = ?";
                 try (PreparedStatement updateStmt = connection.prepareStatement(sqlUpdate)) {
                     updateStmt.setInt(1, cvId);
                     updateStmt.executeUpdate();

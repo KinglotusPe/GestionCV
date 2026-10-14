@@ -50,8 +50,8 @@ public final class AuditUtil {
             statement.setString(6, ipAddress);
 
             statement.executeUpdate();
-        } catch (SQLException ignored) {
-            // El fallo de auditoría no debe interrumpir el flujo principal de la aplicación
+        } catch (SQLException e) {
+            org.apache.logging.log4j.LogManager.getLogger(AuditUtil.class).error("No se pudo registrar auditoría",e);
         }
     }
 }

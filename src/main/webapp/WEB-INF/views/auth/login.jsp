@@ -8,9 +8,9 @@
             <!-- Columna Izquierda: Formulario de Inicio de Sesión -->
             <div class="col-lg-6 login-col-form">
                 <div class="text-center mb-4">
-                    <img src="${pageContext.request.contextPath}/assets/images/logo_hierro_pozo.png" 
-                         alt="Logo Hierro Pozo" 
-                         class="mb-2" 
+                    <img src="${pageContext.request.contextPath}/assets/images/logo_hierro_pozo.png"
+                         alt="Logo Hierro Pozo"
+                         class="mb-2"
                          style="width: 85px; height: 85px; object-fit: contain;">
                     <h3 class="fw-bold text-dark mt-2 mb-1" style="font-size: 1.55rem;">Iniciar Sesión</h3>
                     <p class="text-muted small mb-0">Plataforma Institucional CVManager</p>
@@ -30,21 +30,22 @@
                     </div>
                 </c:if>
 
-                <form method="post" action="${pageContext.request.contextPath}/login" novalidate>
+                <c:if test="${param.passwordChanged == '1'}"><div class="alert alert-success">Contraseña actualizada. Inicie sesión.</div></c:if><form method="post" action="${pageContext.request.contextPath}/login" novalidate>
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                     <div class="mb-3">
-                        <input class="form-control login-input-clean" 
-                               type="email" 
-                               name="email" 
-                               placeholder="Usuario" 
-                               required 
+                        <input class="form-control login-input-clean"
+                               type="email"
+                               name="email"
+                               placeholder="Correo electrónico" aria-label="Correo electrónico"
+                               required
                                autofocus>
                     </div>
 
                     <div class="mb-2">
-                        <input class="form-control login-input-clean" 
-                               type="password" 
-                               name="password" 
-                               placeholder="Contraseña" 
+                        <input class="form-control login-input-clean"
+                               type="password"
+                               name="password"
+                               placeholder="Contraseña" aria-label="Contraseña"
                                required>
                     </div>
 
@@ -80,7 +81,7 @@
                         Manual de estudiante
                     </button>
                     <button type="button" class="btn btn-info-pill" data-bs-toggle="modal" data-bs-target="#modalManualDocente">
-                        Manual docente
+                        Manual de administración
                     </button>
                     <button type="button" class="btn btn-info-pill" data-bs-toggle="modal" data-bs-target="#modalManualBolsa">
                         Manual bolsa laboral
@@ -88,9 +89,9 @@
                     <button type="button" class="btn btn-info-pill" data-bs-toggle="modal" data-bs-target="#modalRecuperar">
                         Manual recuperar contraseña
                     </button>
-                    
+
                     <hr class="my-2 border-white opacity-25">
-                    
+
                     <a href="${pageContext.request.contextPath}/register" class="btn btn-warning text-dark fw-bold rounded-pill py-2 shadow-sm">
                         <i class="fa-solid fa-user-plus me-1"></i> Registrarse como Egresado o Empresa
                     </a>
@@ -110,10 +111,10 @@
             </div>
             <div class="modal-body p-4">
                 <ol class="small text-secondary mb-3 ps-3">
-                    <li class="mb-2"><strong>Registro:</strong> Cree su cuenta con su DNI, carrera y datos personales en el enlace de registro.</li>
+                    <li class="mb-2"><strong>Registro:</strong> Cree su cuenta con correo, contraseña, nombres y apellidos. Espere la aprobación del administrador.</li>
                     <li class="mb-2"><strong>Perfil Profesional:</strong> Complete su resumen ejecutivo, teléfono y enlaces a LinkedIn o portafolio.</li>
                     <li class="mb-2"><strong>Secciones del CV:</strong> Ingrese su formación académica, experiencia de prácticas/empleo, habilidades técnicas, idiomas y certificaciones.</li>
-                    <li class="mb-2"><strong>Visibilidad Laboral:</strong> Su perfil quedará disponible para empresas aliadas que buscan profesionales técnicos del IDEX MAHP.</li>
+                    <li class="mb-2"><strong>Visibilidad Laboral:</strong> Publique su CV y habilite su perfil público para aparecer en las búsquedas. Responda propuestas y postule a vacantes desde su menú.</li>
                 </ol>
                 <div class="text-end">
                     <a href="${pageContext.request.contextPath}/register" class="btn btn-primary btn-sm fw-bold">
@@ -130,17 +131,17 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content rounded-4 border-0 shadow">
             <div class="modal-header bg-dark text-white">
-                <h5 class="modal-title fw-bold"><i class="fa-solid fa-chalkboard-user me-2"></i> Manual Docente y Administrador</h5>
+                <h5 class="modal-title fw-bold"><i class="fa-solid fa-chalkboard-user me-2"></i> Manual del Administrador</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
                 <p class="small text-muted mb-3">
-                    El personal docente y coordinadores de programas de estudios pueden supervisar a los egresados y gestionar las carreras desde el módulo de administración institucional.
+                    Las cuentas con rol Administrador pueden gestionar usuarios, carreras y estadísticas desde el módulo institucional.
                 </p>
                 <ul class="small text-secondary mb-0 ps-3">
-                    <li>Supervisión de métricas y tasa de empleabilidad por carrera.</li>
-                    <li>Registro y activación de cuentas egresadas y de empresas.</li>
-                    <li>Trazabilidad completa mediante el registro de auditoría de seguridad.</li>
+                    <li>Consulta de egresados por carrera, cuentas, vacantes y postulaciones.</li>
+                    <li>Activación de cuentas, cambios de rol y recuperación de contraseñas.</li>
+                    <li>Consulta del historial de accesos y operaciones realizadas.</li>
                 </ul>
             </div>
         </div>
@@ -157,10 +158,10 @@
             </div>
             <div class="modal-body p-4">
                 <ol class="small text-secondary mb-3 ps-3">
-                    <li class="mb-2"><strong>Registro Empresarial:</strong> Ingrese con RUC y Razón Social de su empresa.</li>
+                    <li class="mb-2"><strong>Registro Empresarial:</strong> Registre su correo y razón social. Tras la aprobación, complete RUC y datos corporativos en Mi empresa.</li>
                     <li class="mb-2"><strong>Buscador de Talentos:</strong> Filtre egresados por programa de estudio, habilidades y año de graduación.</li>
                     <li class="mb-2"><strong>Guardar Favoritos:</strong> Marque a los candidatos de interés con estrella para un seguimiento ágil.</li>
-                    <li class="mb-2"><strong>Contacto Directo:</strong> Envíe solicitudes de entrevista o propuesta laboral con mensajes personalizados.</li>
+                    <li class="mb-2"><strong>Contacto Directo:</strong> Envíe propuestas y espere la aceptación para acceder al contacto y al PDF. En Vacantes puede publicar ofertas y evaluar postulaciones.</li>
                 </ol>
             </div>
         </div>
@@ -179,11 +180,7 @@
                 <p class="small text-muted mb-3">
                     Por políticas de seguridad institucional del IESP "Manuel Antonio Hierro Pozo", si ha olvidado su contraseña:
                 </p>
-                <div class="alert alert-light border small text-secondary mb-3">
-                    <i class="fa-solid fa-envelope me-2 text-primary"></i> <strong>Soporte Técnico:</strong> soporte@tecnologicohierropozo.edu.pe<br>
-                    <i class="fa-solid fa-location-dot me-2 text-danger"></i> <strong>Atención Presencial:</strong> Unidad de TI - Pabellón A, Ayacucho
-                </div>
-                <p class="small text-muted mb-0">Indique su DNI, nombres completos y carrera para el restablecimiento de su acceso.</p>
+                <p>Contacte al administrador institucional para verificar su identidad. Desde Gestión de usuarios podrá generar un enlace privado de recuperación, válido durante 30 minutos y para un solo uso.</p>
             </div>
         </div>
     </div>

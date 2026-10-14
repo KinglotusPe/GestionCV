@@ -17,7 +17,7 @@
                 <c:when test="${locked}">
                     <div class="alert alert-danger text-center">
                         <i class="fa-solid fa-lock fa-2x mb-2 d-block"></i>
-                        <strong>El sistema ya cuenta con un administrador registrado.</strong>
+                        <strong>La creación inicial de administrador está deshabilitada.</strong>
                         <p class="small mb-0 mt-2">Por motivos de seguridad, esta acción está inhabilitada.</p>
                     </div>
                     <div class="text-center mt-3">
@@ -33,8 +33,9 @@
                     </div>
 
                     <form method="post" action="${pageContext.request.contextPath}/setup-admin">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                         <div class="mb-3">
-                            <label class="form-label fw-bold">Correo de Administrador</label>
+                            <label class="form-label fw-bold">Clave de instalación</label><input class="form-control mb-3" type="password" name="setupToken" required autocomplete="off"><label class="form-label fw-bold">Correo de Administrador</label>
                             <input class="form-control" type="email" name="email" placeholder="admin@hierropozo.edu.pe" required>
                         </div>
                         <div class="mb-4">

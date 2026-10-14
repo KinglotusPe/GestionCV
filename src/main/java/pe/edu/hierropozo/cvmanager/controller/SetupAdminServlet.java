@@ -27,7 +27,7 @@ public class SetupAdminServlet extends HttpServlet {
 
         try {
             boolean hasAdmin = userDAO.hasAdmin();
-            request.setAttribute("locked", hasAdmin);
+            request.setAttribute("locked", hasAdmin || System.getenv("CVMANAGER_SETUP_TOKEN") == null);
             request.setAttribute("pageTitle", "Configuración Inicial de Administrador - CVManager");
             request.getRequestDispatcher("/WEB-INF/views/auth/setupAdmin.jsp").forward(request, response);
         } catch (Exception e) {
@@ -40,6 +40,11 @@ public class SetupAdminServlet extends HttpServlet {
             throws ServletException, IOException {
 
         try {
+            String setupToken=System.getenv("CVMANAGER_SETUP_TOKEN");
+            String supplied=request.getParameter("setupToken");
+            if(setupToken==null || setupToken.length()<24 || supplied==null || !java.security.MessageDigest.isEqual(setupToken.getBytes(java.nio.charset.StandardCharsets.UTF_8),supplied.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
+                response.sendError(403,"Clave de instalación inválida o configuración deshabilitada.");return;
+            }
             if (userDAO.hasAdmin()) {
                 response.sendError(HttpServletResponse.SC_FORBIDDEN, "Ya existe un administrador en el sistema.");
                 return;
@@ -49,6 +54,7 @@ public class SetupAdminServlet extends HttpServlet {
             String password = request.getParameter("password");
 
             if (!ValidationUtil.email(email) || !ValidationUtil.password(password)) {
+                response.setStatus(400);
                 request.setAttribute("error", "Correo o contraseña no válidos (mínimo 8 caracteres).");
                 doGet(request, response);
                 return;

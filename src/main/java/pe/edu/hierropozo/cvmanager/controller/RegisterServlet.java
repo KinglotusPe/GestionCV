@@ -44,17 +44,24 @@ public class RegisterServlet extends HttpServlet {
             // Validaciones del servidor
             if (!ValidationUtil.email(email) || !ValidationUtil.password(password) ||
                 (!"graduate".equals(role) && !"company".equals(role))) {
+                response.setStatus(400);
                 request.setAttribute("error", "Datos no válidos. La contraseña debe tener al menos 8 caracteres y el correo ser válido.");
                 doGet(request, response);
                 return;
             }
 
             if (userDAO.findByEmail(email) != null) {
+                response.setStatus(400);
                 request.setAttribute("error", "El correo electrónico ya se encuentra registrado.");
                 doGet(request, response);
                 return;
             }
 
+            if ("graduate".equals(role)) {
+                ValidationUtil.text(firstName, "Nombres", 80, true);
+                ValidationUtil.text(lastName, "Apellidos", 100, true);
+            } else ValidationUtil.text(companyName, "Empresa", 150, true);
+            ValidationUtil.text(email, "Correo", 150, true);
             registrationService.register(email, password, role, firstName, lastName, companyName);
             request.setAttribute("success", "Registro completado con éxito. Su cuenta se encuentra en estado 'pendiente' a la espera de aprobación por el administrador.");
             doGet(request, response);

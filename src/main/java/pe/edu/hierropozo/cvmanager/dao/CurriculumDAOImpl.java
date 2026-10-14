@@ -55,7 +55,7 @@ public class CurriculumDAOImpl implements CurriculumDAO {
     @Override
     public Curriculum findPublished(int cvId) throws Exception {
         String sql = "SELECT cv_id, graduate_id, title, professional_summary, cv_pdf_url, " +
-                     "is_published, views_count FROM cv WHERE cv_id = ? AND is_published = 1";
+                     "is_published, views_count FROM cv WHERE cv_id = ? AND is_published = 1 AND EXISTS (SELECT 1 FROM egresados g JOIN usuarios u ON u.user_id = g.user_id WHERE g.graduate_id = cv.graduate_id AND g.is_public = 1 AND u.status = 'active' AND u.role = 'graduate')";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -101,7 +101,7 @@ public class CurriculumDAOImpl implements CurriculumDAO {
     public List<Map<String, Object>> section(String tableName, String foreignKeyColumn, int cvId) throws Exception {
         // Validación de lista blanca para prevenir inyección en nombres de tablas dinámicas de secciones
         List<String> allowedTables = List.of("educacion", "experiencia", "habilidades", "idiomas", "certificaciones", "referencias");
-        if (!allowedTables.contains(tableName)) {
+        if (!allowedTables.contains(tableName) || !"cv_id".equals(foreignKeyColumn)) {
             throw new IllegalArgumentException("Nombre de sección no permitido: " + tableName);
         }
 

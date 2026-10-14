@@ -35,7 +35,7 @@
             <label class="form-label small fw-bold">Ciudad</label>
             <input class="form-control" type="text" name="city" value="<c:out value='${param.city}'/>" placeholder="Ej: Ayacucho">
         </div>
-        <div class="col-md-2 d-flex align-items-end">
+        <div class="col-md-2"><label class="form-label">Año de egreso</label><input class="form-control" type="number" name="year" min="1950" max="2100" value="<c:out value='${param.year}'/>"></div><div class="col-md-2 d-flex align-items-end">
             <button class="btn btn-success w-100 fw-bold" type="submit">
                 <i class="fa-solid fa-filter me-1"></i> Filtrar
             </button>
@@ -74,6 +74,7 @@
                             <i class="fa-solid fa-address-card me-1"></i> Ver CV
                         </a>
                         <form method="post" action="${pageContext.request.contextPath}/company/action" class="d-inline">
+<input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                             <input type="hidden" name="action" value="favorite">
                             <input type="hidden" name="cvId" value="${item.cv_id}">
                             <button class="btn btn-outline-warning btn-sm text-dark" type="submit" title="Guardar como favorito">
@@ -96,17 +97,8 @@
     </c:if>
 </div>
 
-<!-- Paginación -->
-<nav class="d-flex justify-content-center gap-2">
-    <a class="btn btn-outline-secondary ${page <= 1 ? 'disabled' : ''}" 
-       href="?page=${page - 1}&q=<c:out value='${param.q}'/>&career=<c:out value='${param.career}'/>&skill=<c:out value='${param.skill}'/>&city=<c:out value='${param.city}'/>">
-        <i class="fa-solid fa-chevron-left me-1"></i> Anterior
-    </a>
-    <span class="btn btn-light disabled fw-bold">Página ${page}</span>
-    <a class="btn btn-outline-secondary" 
-       href="?page=${page + 1}&q=<c:out value='${param.q}'/>&career=<c:out value='${param.career}'/>&skill=<c:out value='${param.skill}'/>&city=<c:out value='${param.city}'/>">
-        Siguiente <i class="fa-solid fa-chevron-right ms-1"></i>
-    </a>
-</nav>
-
+<!-- Paginación con parámetros codificados -->
+<c:url var="previousUrl" value="/company/search"><c:param name="page" value="${page-1}"/><c:param name="q" value="${param.q}"/><c:param name="career" value="${param.career}"/><c:param name="skill" value="${param.skill}"/><c:param name="city" value="${param.city}"/><c:param name="year" value="${param.year}"/></c:url>
+<c:url var="nextUrl" value="/company/search"><c:param name="page" value="${page+1}"/><c:param name="q" value="${param.q}"/><c:param name="career" value="${param.career}"/><c:param name="skill" value="${param.skill}"/><c:param name="city" value="${param.city}"/><c:param name="year" value="${param.year}"/></c:url>
+<nav class="d-flex justify-content-center gap-2"><c:if test="${page > 1}"><a class="btn btn-outline-secondary" href="<c:out value='${previousUrl}'/>">Anterior</a></c:if><span class="btn btn-light">Página ${page}</span><c:if test="${hasNext}"><a class="btn btn-outline-secondary" href="<c:out value='${nextUrl}'/>">Siguiente</a></c:if></nav>
 <%@ include file="../common/footer.jspf" %>

@@ -16,7 +16,6 @@ import java.io.IOException;
  * Protege las rutas privadas (/graduate/*, /company/*, /admin/*) verificando
  * que el usuario posea una sesión HTTP activa.
  */
-@WebFilter(urlPatterns = {"/graduate/*", "/company/*", "/admin/*"})
 public class AuthenticationFilter implements Filter {
 
     @Override
