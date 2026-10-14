@@ -24,6 +24,10 @@ public class ProfileDAOImpl implements ProfileDAO {
  public boolean contactAccepted(int graduate,int companyUser)throws SQLException {
   return !JobDAOImpl.rows("SELECT 1 FROM solicitudes_contacto s JOIN empresas e ON e.company_id=s.company_id WHERE s.graduate_id=? AND e.user_id=? AND s.status='accepted' LIMIT 1",graduate,companyUser).isEmpty();
  }
+ public String contactStatus(int graduate,int companyUser)throws SQLException {
+  var rows=JobDAOImpl.rows("SELECT s.status FROM solicitudes_contacto s JOIN empresas e ON e.company_id=s.company_id WHERE s.graduate_id=? AND e.user_id=? ORDER BY s.created_at DESC LIMIT 1",graduate,companyUser);
+  return rows.isEmpty()?null:(String)rows.get(0).get("status");
+ }
  public Integer graduateForCv(int cvId)throws SQLException {
   var rows=JobDAOImpl.rows("SELECT graduate_id FROM cv WHERE cv_id=?",cvId);
   return rows.isEmpty()?null:((Number)rows.get(0).get("graduate_id")).intValue();

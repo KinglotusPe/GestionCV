@@ -78,7 +78,7 @@
         </div>
     </c:if>
 
-    <form method="post" action="${pageContext.request.contextPath}/graduate/upload" enctype="multipart/form-data">
+    <form method="post" action="${pageContext.request.contextPath}/graduate/upload?csrfToken=${sessionScope.csrfToken}" enctype="multipart/form-data">
 <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
         <input type="hidden" name="type" value="pdf">
         <label class="form-label small fw-bold">Adjuntar o actualizar archivo PDF:</label>

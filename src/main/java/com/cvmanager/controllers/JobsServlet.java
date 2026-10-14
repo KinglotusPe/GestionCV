@@ -77,6 +77,18 @@ public class JobsServlet extends HttpServlet {
             }else if(!role.equals("admin")&&action.equals("respond"))service.respond(actor,role.equals("company"),id,req.getParameter("status"));
             else throw new IllegalArgumentException("Acción inválida.");
             res.sendRedirect(req.getContextPath()+"/"+role+"/jobs?ok=1"+(Set.of("upload","removeDocument").contains(action)?"&view="+id:""));
-        }catch(Exception e){throw new ServletException(e);}
+        } catch (IllegalArgumentException e) {
+            req.getSession().setAttribute("flashError", e.getMessage());
+            String redir = req.getContextPath() + "/" + role + "/jobs?error=" + java.net.URLEncoder.encode(e.getMessage(), java.nio.charset.StandardCharsets.UTF_8);
+            if ("save".equals(req.getParameter("action"))) {
+                redir += (req.getParameter("id") != null && !req.getParameter("id").isBlank() ? "&edit=" + req.getParameter("id") : "&new=1");
+            } else if (Set.of("upload", "removeDocument").contains(req.getParameter("action"))) {
+                redir += "&view=" + req.getParameter("id");
+            }
+            res.sendRedirect(redir);
+        } catch (Exception e) {
+            req.getSession().setAttribute("flashError", "Ocurrió un error al procesar la solicitud: " + e.getMessage());
+            res.sendRedirect(req.getContextPath() + "/" + role + "/jobs");
+        }
     }
 }

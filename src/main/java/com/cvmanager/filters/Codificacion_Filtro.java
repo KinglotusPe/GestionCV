@@ -5,7 +5,8 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
-import jakarta.servlet.annotation.WebFilter;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
@@ -21,6 +22,14 @@ public class Codificacion_Filtro implements Filter {
         request.setCharacterEncoding("UTF-8");
         response.setCharacterEncoding("UTF-8");
 
+        if (request instanceof HttpServletRequest req && response instanceof HttpServletResponse res) {
+            String path = req.getServletPath();
+            if (!path.startsWith("/assets/") && !path.startsWith("/files") && !path.startsWith("/uploads/")) {
+                res.setContentType("text/html; charset=UTF-8");
+            }
+        }
+
         chain.doFilter(request, response);
     }
 }
+

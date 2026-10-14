@@ -52,8 +52,16 @@ public class Autenticacion_Filtro implements Filter {
         try {
             if (mutation) {
                 String actual = request.getParameter("csrfToken");
+                if (actual == null) actual = request.getHeader("X-CSRF-Token");
+                String contentType = request.getContentType();
+                if (actual == null && contentType != null && contentType.toLowerCase().startsWith("multipart/")) {
+                    try {
+                        Part part = request.getPart("csrfToken");
+                        if (part != null) actual = new String(part.getInputStream().readAllBytes(), StandardCharsets.UTF_8).trim();
+                    } catch (Exception ignored) {}
+                }
                 String expected = (String) session.getAttribute("csrfToken");
-                if (actual == null || !MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8), actual.getBytes(StandardCharsets.UTF_8))) {
+                if (actual == null || expected == null || !MessageDigest.isEqual(expected.getBytes(StandardCharsets.UTF_8), actual.getBytes(StandardCharsets.UTF_8))) {
                     if(JsonResponse.requested(request))JsonResponse.send(response,403,java.util.Map.of("message","El formulario expiró. Recargue la página."));
                     else response.sendError(403, "El formulario expiró. Recargue la página e intente nuevamente.");
                     return;

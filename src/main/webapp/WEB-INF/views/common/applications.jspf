@@ -1,11 +1,144 @@
-<c:if test="${not adminMode}"><section id="applications" class="mt-4"><h3>${companyMode ? 'Postulaciones recibidas' : 'Mis postulaciones'}</h3>
-<c:if test="${empty applications}"><p class="text-muted">Todavía no hay postulaciones.</p></c:if>
-<c:forEach var="a" items="${applications}"><article class="card p-4 mb-3"><h4 class="h5"><c:out value="${a.title}"/> · <c:out value="${a.company_name}"/></h4>
-<c:if test="${companyMode}"><p><c:out value="${a.first_name} ${a.last_name}"/> · <c:out value="${a.email}"/> · <c:out value="${a.phone}"/></p><c:if test="${a.status != 'withdrawn' and not empty a.email}"><a class="mb-3" href="${pageContext.request.contextPath}/company/cv?id=${a.cv_id}">Ver CV del postulante</a></c:if></c:if>
-<p style="white-space:pre-wrap"><c:out value="${a.message}"/></p>
-<p>Estado: <strong><c:choose><c:when test="${a.status == 'pending'}">Pendiente</c:when><c:when test="${a.status == 'reviewing'}">En evaluación</c:when><c:when test="${a.status == 'accepted'}">Aceptada</c:when><c:when test="${a.status == 'rejected'}">Rechazada</c:when><c:otherwise>Retirada</c:otherwise></c:choose></strong></p>
-<c:if test="${a.status != 'withdrawn'}"><form method="post" action="${jobsPath}" class="d-flex gap-2">
-<hp:csrf/><input type="hidden" name="action" value="respond"><input type="hidden" name="id" value="${a.application_id}">
-<c:choose><c:when test="${companyMode}"><select class="form-select" name="status"><option value="pending" ${a.status == 'pending' ? 'selected' : ''}>Pendiente</option><option value="reviewing" ${a.status == 'reviewing' ? 'selected' : ''}>En evaluación</option><option value="accepted" ${a.status == 'accepted' ? 'selected' : ''}>Aceptada</option><option value="rejected" ${a.status == 'rejected' ? 'selected' : ''}>Rechazada</option></select><button class="btn btn-success">Actualizar</button></c:when><c:otherwise><button class="btn btn-outline-danger" name="status" value="withdrawn">Retirar postulación y acceso al CV</button></c:otherwise></c:choose>
-</form></c:if></article></c:forEach>
-</section></c:if>
+<c:if test="${not adminMode}">
+    <section id="applications" class="mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3 class="h4 mb-0 fw-bold">
+                <i class="fa-solid fa-file-signature text-success me-2"></i>${companyMode ? 'Postulaciones Recibidas' : 'Mis Postulaciones'}
+            </h3>
+            <span class="badge bg-secondary">${not empty applications ? applications.size() : 0} en total</span>
+        </div>
+
+        <c:if test="${empty applications}">
+            <div class="alert alert-light border p-4 text-center">
+                <i class="fa-regular fa-folder-open fa-2x text-muted mb-2 d-block"></i>
+                <p class="text-muted mb-0">Todavía no hay postulaciones registradas en este apartado.</p>
+            </div>
+        </c:if>
+
+        <c:forEach var="a" items="${applications}">
+            <article class="card p-4 mb-3 border shadow-sm ${a.status == 'accepted' ? 'border-success' : ''}">
+                <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-2">
+                    <div>
+                        <h4 class="h5 fw-bold mb-1 text-dark">
+                            <c:out value="${a.title}"/> 
+                            <span class="text-muted fw-normal">· <c:out value="${a.company_name}"/></span>
+                        </h4>
+                        <div class="small text-muted">
+                            <i class="fa-regular fa-clock me-1"></i>Postulado el: <c:out value="${a.applied_at}"/>
+                        </div>
+                    </div>
+                    <div>
+                        <c:choose>
+                            <c:when test="${a.status == 'pending'}">
+                                <span class="badge bg-warning text-dark px-3 py-2"><i class="fa-solid fa-hourglass-half me-1"></i> Pendiente</span>
+                            </c:when>
+                            <c:when test="${a.status == 'reviewing'}">
+                                <span class="badge bg-info text-dark px-3 py-2"><i class="fa-solid fa-spinner me-1"></i> En evaluación</span>
+                            </c:when>
+                            <c:when test="${a.status == 'accepted'}">
+                                <span class="badge bg-success px-3 py-2"><i class="fa-solid fa-circle-check me-1"></i> ¡Aceptado / Seleccionado!</span>
+                            </c:when>
+                            <c:when test="${a.status == 'rejected'}">
+                                <span class="badge bg-danger px-3 py-2"><i class="fa-solid fa-ban me-1"></i> No seleccionado</span>
+                            </c:when>
+                            <c:otherwise>
+                                <span class="badge bg-secondary px-3 py-2">Retirada</span>
+                            </c:otherwise>
+                        </c:choose>
+                    </div>
+                </div>
+
+                <!-- Si el usuario es el egresado y la empresa lo acepto, mostramos el banner de celebracion y datos de contacto directo de la empresa -->
+                <c:if test="${not companyMode and a.status == 'accepted'}">
+                    <div class="alert alert-success border-success mt-2 mb-3 p-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fa-solid fa-award fa-2x text-success me-3"></i>
+                            <div>
+                                <h5 class="alert-heading mb-0 fw-bold">¡Felicitaciones! Has sido aceptado para este puesto</h5>
+                                <small>La empresa ha aprobado tu postulación. Comunícate directamente con ellos para continuar tu proceso de incorporación.</small>
+                            </div>
+                        </div>
+                        <hr class="my-2">
+                        <div class="row g-2 align-items-center">
+                            <c:if test="${not empty a.company_email}">
+                                <div class="col-auto">
+                                    <a href="mailto:${a.company_email}" class="btn btn-sm btn-outline-success">
+                                        <i class="fa-solid fa-envelope me-1"></i> <c:out value="${a.company_email}"/>
+                                    </a>
+                                </div>
+                            </c:if>
+                            <c:if test="${not empty a.company_phone}">
+                                <div class="col-auto">
+                                    <a href="https://wa.me/51${a.company_phone}" target="_blank" class="btn btn-sm btn-success">
+                                        <i class="fa-brands fa-whatsapp me-1"></i> WhatsApp: <c:out value="${a.company_phone}"/>
+                                    </a>
+                                </div>
+                            </c:if>
+                            <c:if test="${not empty a.job_city}">
+                                <div class="col-auto text-muted small">
+                                    <i class="fa-solid fa-location-dot me-1"></i> Sede / Ciudad: <c:out value="${a.job_city}"/>
+                                </div>
+                            </c:if>
+                        </div>
+                    </div>
+                </c:if>
+
+                <!-- Si el usuario es empresa, mostramos los datos del postulante -->
+                <c:if test="${companyMode}">
+                    <div class="p-2 mb-2 bg-light rounded d-flex flex-wrap justify-content-between align-items-center gap-2">
+                        <div>
+                            <strong><i class="fa-solid fa-user me-1"></i> Candidato:</strong> <c:out value="${a.first_name} ${a.last_name}"/>
+                            <c:if test="${not empty a.email}"> · <i class="fa-solid fa-envelope me-1"></i> <a href="mailto:${a.email}"><c:out value="${a.email}"/></a></c:if>
+                            <c:if test="${not empty a.phone}"> · <i class="fa-solid fa-phone me-1"></i> <c:out value="${a.phone}"/></c:if>
+                        </div>
+                        <div>
+                            <c:if test="${a.status != 'withdrawn' and not empty a.cv_id}">
+                                <a class="btn btn-sm btn-outline-primary" href="${pageContext.request.contextPath}/company/cv?id=${a.cv_id}">
+                                    <i class="fa-regular fa-file-pdf me-1"></i> Ver CV completo
+                                </a>
+                            </c:if>
+                        </div>
+                    </div>
+                </c:if>
+
+                <!-- Mensaje adjunto a la postulacion -->
+                <c:if test="${not empty a.message}">
+                    <div class="mb-3 text-secondary p-2 bg-white rounded border-start border-3 border-secondary">
+                        <small class="fw-bold d-block text-dark mb-1">Mensaje de presentación:</small>
+                        <span style="white-space:pre-wrap;"><c:out value="${a.message}"/></span>
+                    </div>
+                </c:if>
+
+                <!-- Acciones segun rol -->
+                <c:if test="${a.status != 'withdrawn'}">
+                    <form method="post" action="${jobsPath}" class="d-flex flex-wrap align-items-center gap-2 mt-2 pt-2 border-top">
+                        <hp:csrf/>
+                        <input type="hidden" name="action" value="respond">
+                        <input type="hidden" name="id" value="${a.application_id}">
+                        
+                        <c:choose>
+                            <c:when test="${companyMode}">
+                                <label class="small fw-bold text-muted me-2">Cambiar estado del postulante:</label>
+                                <select class="form-select form-select-sm w-auto" name="status">
+                                    <option value="pending" ${a.status == 'pending' ? 'selected' : ''}>Pendiente</option>
+                                    <option value="reviewing" ${a.status == 'reviewing' ? 'selected' : ''}>En evaluación</option>
+                                    <option value="accepted" ${a.status == 'accepted' ? 'selected' : ''}>Aceptada / Contratado</option>
+                                    <option value="rejected" ${a.status == 'rejected' ? 'selected' : ''}>Rechazada</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-success">
+                                    <i class="fa-solid fa-check me-1"></i> Actualizar estado
+                                </button>
+                            </c:when>
+                            <c:otherwise>
+                                <c:if test="${a.status != 'accepted'}">
+                                    <button class="btn btn-sm btn-outline-danger" name="status" value="withdrawn" onclick="return confirm('¿Estás seguro de que deseas retirar tu postulación?');">
+                                        <i class="fa-solid fa-trash me-1"></i> Retirar postulación
+                                    </button>
+                                </c:if>
+                            </c:otherwise>
+                        </c:choose>
+                    </form>
+                </c:if>
+            </article>
+        </c:forEach>
+    </section>
+</c:if>

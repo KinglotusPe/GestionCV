@@ -83,11 +83,46 @@
                     <tbody>
                         <c:forEach var="r" items="${requests}">
                             <tr>
-                                <td><strong><c:out value="${r.first_name} ${r.last_name}"/></strong></td>
+                                <td>
+                                    <c:choose>
+                                        <c:when test="${not empty r.cv_id}">
+                                            <a class="fw-bold text-success text-decoration-none" href="${pageContext.request.contextPath}/company/cv?id=${r.cv_id}">
+                                                <c:out value="${r.first_name} ${r.last_name}"/>
+                                            </a>
+                                            <small class="d-block text-muted"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Ver CV</small>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <strong><c:out value="${r.first_name} ${r.last_name}"/></strong>
+                                        </c:otherwise>
+                                    </c:choose>
+                                </td>
                                 <td><span class="badge bg-light text-dark border"><c:out value="${r.career}"/></span></td>
                                 <td class="small">
-                                    <c:if test="${empty r.graduate_email}">Disponible al aceptar la solicitud</c:if><i class="fa-solid fa-phone me-1"></i> <c:out value="${r.phone}"/><br>
-                                    <i class="fa-solid fa-envelope me-1"></i> <c:out value="${r.graduate_email}"/>
+                                    <c:choose>
+                                        <c:when test="${r.status == 'accepted'}">
+                                            <div class="p-2 bg-success-subtle border border-success rounded">
+                                                <div class="fw-bold text-success mb-1"><i class="fa-solid fa-circle-check"></i> Contacto Compartido</div>
+                                                <c:if test="${not empty r.phone}">
+                                                    <div class="mb-1">
+                                                        <a href="tel:${r.phone}" class="text-dark text-decoration-none"><i class="fa-solid fa-phone text-success me-1"></i> <c:out value="${r.phone}"/></a>
+                                                        <a href="https://wa.me/51${r.phone}" target="_blank" class="btn btn-sm btn-success ms-1 py-0 px-2 small"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+                                                    </div>
+                                                </c:if>
+                                                <c:if test="${not empty r.graduate_email}">
+                                                    <div>
+                                                        <a href="mailto:${r.graduate_email}" class="text-dark text-decoration-none"><i class="fa-solid fa-envelope text-primary me-1"></i> <c:out value="${r.graduate_email}"/></a>
+                                                    </div>
+                                                </c:if>
+                                            </div>
+                                        </c:when>
+                                        <c:when test="${r.status == 'rejected'}">
+                                            <span class="text-muted"><i class="fa-solid fa-ban text-danger me-1"></i> Solicitud rechazada</span>
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="badge bg-warning-subtle text-warning border"><i class="fa-solid fa-clock me-1"></i> En espera de aprobación</span>
+                                            <small class="d-block text-muted mt-1">Disponible cuando acepte</small>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </td>
                                 <td class="small text-muted" style="max-width: 250px;">
                                     <c:out value="${r.message}"/>
@@ -122,5 +157,14 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.location.hash === '#tab-req' || new URLSearchParams(window.location.search).get('tab') === 'requests') {
+        var trigger = document.getElementById('req-tab');
+        if (trigger) { new bootstrap.Tab(trigger).show(); }
+    }
+});
+</script>
 
 <%@ include file="../common/footer.jsp" %>

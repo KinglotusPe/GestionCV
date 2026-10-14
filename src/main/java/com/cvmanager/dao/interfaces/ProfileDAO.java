@@ -8,6 +8,7 @@ public interface ProfileDAO {
     List<Map<String,Object>> requests(int userId)throws SQLException;
     boolean respond(int userId,int id,String status)throws SQLException;
     boolean contactAccepted(int graduate,int companyUser)throws SQLException;
+    String contactStatus(int graduate,int companyUser)throws SQLException;
     Integer graduateForCv(int cvId)throws SQLException;
     String authorizedFile(int cv,int user,String role,String type,boolean applicationAccess)throws SQLException;
     String replaceFile(int userId,String type,String stored)throws SQLException;

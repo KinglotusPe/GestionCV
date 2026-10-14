@@ -183,10 +183,11 @@ public class SearchDAOImpl implements SearchDAO {
      */
     public List<Map<String, Object>> getContactRequests(int userId) throws Exception {
         String sql = "SELECT sc.request_id, sc.message, sc.status, sc.created_at, " +
-                     "g.first_name, g.last_name, CASE WHEN sc.status = 'accepted' AND u.status = 'active' AND u.role = 'graduate' THEN g.phone END AS phone, CASE WHEN sc.status = 'accepted' AND u.status = 'active' AND u.role = 'graduate' THEN u.email END AS graduate_email, c.name AS career " +
+                     "g.first_name, g.last_name, cv.cv_id, CASE WHEN sc.status = 'accepted' AND u.status = 'active' AND u.role = 'graduate' THEN g.phone END AS phone, CASE WHEN sc.status = 'accepted' AND u.status = 'active' AND u.role = 'graduate' THEN u.email END AS graduate_email, c.name AS career " +
                      "FROM solicitudes_contacto sc " +
                      "JOIN empresas emp ON emp.company_id = sc.company_id " +
                      "JOIN egresados g ON g.graduate_id = sc.graduate_id " +
+                     "LEFT JOIN cv ON cv.graduate_id = g.graduate_id " +
                      "JOIN usuarios u ON u.user_id = g.user_id " +
                      "LEFT JOIN carreras c ON c.career_id = g.career_id " +
                      "WHERE emp.user_id = ? " +

@@ -40,7 +40,7 @@
                 </c:choose>
             </div>
 
-            <form method="post" action="${pageContext.request.contextPath}/graduate/upload" enctype="multipart/form-data">
+            <form method="post" action="${pageContext.request.contextPath}/graduate/upload?csrfToken=${sessionScope.csrfToken}" enctype="multipart/form-data">
 <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                 <input type="hidden" name="type" value="photo">
                 <div class="mb-3 text-start">

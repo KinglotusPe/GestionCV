@@ -7,10 +7,10 @@ import com.cvmanager.utils.ValidacionUtil;
 
 public class ApplicationDAOImpl implements ApplicationDAO {
     public List<Map<String,Object>> applications(int userId,boolean company)throws SQLException {
-        return rows("SELECT a.*,j.title,e.company_name,g.first_name,g.last_name,cv.cv_id,"+
+        return rows("SELECT a.*,j.title,j.city AS job_city,e.company_name,e.phone AS company_phone,e.website AS company_website,eu.email AS company_email,g.first_name,g.last_name,cv.cv_id,"+
             "CASE WHEN a.status <> 'withdrawn' AND gu.status='active' AND gu.role='graduate' THEN gu.email END AS email,"+
             "CASE WHEN a.status <> 'withdrawn' AND gu.status='active' AND gu.role='graduate' THEN g.phone END AS phone "+
-            "FROM postulaciones a JOIN vacantes j ON j.job_id=a.job_id JOIN empresas e ON e.company_id=j.company_id JOIN egresados g ON g.graduate_id=a.graduate_id JOIN usuarios gu ON gu.user_id=g.user_id JOIN cv ON cv.graduate_id=g.graduate_id WHERE "+
+            "FROM postulaciones a JOIN vacantes j ON j.job_id=a.job_id JOIN empresas e ON e.company_id=j.company_id JOIN usuarios eu ON eu.user_id=e.user_id JOIN egresados g ON g.graduate_id=a.graduate_id JOIN usuarios gu ON gu.user_id=g.user_id JOIN cv ON cv.graduate_id=g.graduate_id WHERE "+
             (company?"e.user_id=?":"g.user_id=?")+" ORDER BY a.created_at DESC",userId);
     }
     public void apply(int userId,int jobId,String message)throws SQLException {

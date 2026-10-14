@@ -1,5 +1,6 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 <%@ taglib prefix="hp" tagdir="/WEB-INF/tags" %>
 <!doctype html>
 <html lang="es">
@@ -27,12 +28,13 @@
 <main class="container py-4">
 
     <!-- Mensajes Globales de Alerta -->
-    <c:if test="${not empty error}">
+    <c:if test="${not empty error or not empty param.error or not empty sessionScope.flashError}">
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <i class="fa-solid fa-triangle-exclamation me-2"></i>
-            <c:out value="${error}"/>
+            <c:out value="${not empty error ? error : (not empty param.error ? param.error : sessionScope.flashError)}"/>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
+        <c:remove var="flashError" scope="session"/>
     </c:if>
 
     <c:if test="${not empty success}">

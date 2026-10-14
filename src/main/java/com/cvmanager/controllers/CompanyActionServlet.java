@@ -20,25 +20,41 @@ public class CompanyActionServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        String returnUrl = request.getParameter("returnUrl");
+        String cvId = request.getParameter("cvId");
+        String defaultRedirect = cvId != null && !cvId.isBlank() 
+            ? request.getContextPath() + "/company/cv?id=" + cvId 
+            : request.getContextPath() + "/company/search";
+
         try {
             int userId = (Integer) request.getSession().getAttribute("userId");
             String action = request.getParameter("action");
 
             if ("favorite".equals(action)) {
-                int cvId = Integer.parseInt(request.getParameter("cvId"));
-                searchService.favorite(userId, cvId);
+                int id = Integer.parseInt(cvId);
+                searchService.favorite(userId, id);
+                request.getSession().setAttribute("success", "Candidato guardado en favoritos.");
             } else if ("contact".equals(action)) {
                 int graduateId = Integer.parseInt(request.getParameter("graduateId"));
                 String message = request.getParameter("message");
                 searchService.requestContact(userId, graduateId, message);
+                request.getSession().setAttribute("success", "Solicitud de contacto enviada con éxito al candidato.");
             } else {
                 throw new IllegalArgumentException("Acción no válida: " + action);
             }
 
-            response.sendRedirect(request.getContextPath() + "/company/search?ok=1");
+            if (returnUrl != null && !returnUrl.isBlank()) {
+                response.sendRedirect(returnUrl + (returnUrl.contains("?") ? "&ok=1" : "?ok=1"));
+            } else {
+                response.sendRedirect(defaultRedirect + (defaultRedirect.contains("?") ? "&ok=1" : "?ok=1"));
+            }
 
+        } catch (IllegalArgumentException e) {
+            request.getSession().setAttribute("flashError", e.getMessage());
+            response.sendRedirect(defaultRedirect);
         } catch (Exception e) {
-            throw new ServletException("Error al procesar la acción de la empresa", e);
+            request.getSession().setAttribute("flashError", "Error al procesar la acción: " + e.getMessage());
+            response.sendRedirect(defaultRedirect);
         }
     }
 }

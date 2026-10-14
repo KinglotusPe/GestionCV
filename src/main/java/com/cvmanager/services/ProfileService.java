@@ -21,5 +21,6 @@ public class ProfileService {
   if(!Set.of("accepted","rejected").contains(Objects.toString(status,"")))throw new IllegalArgumentException("Respuesta inválida.");return dao.respond(user,id,status);
  }
  public boolean contactAccepted(int graduate,int companyUser)throws Exception{return dao.contactAccepted(graduate,companyUser);}
+ public String contactStatus(int graduate,int companyUser)throws Exception{return dao.contactStatus(graduate,companyUser);}
  public Integer graduateForCv(int cv)throws Exception{return dao.graduateForCv(cv);}
 }

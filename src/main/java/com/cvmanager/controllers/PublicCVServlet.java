@@ -49,8 +49,13 @@ public class PublicCVServlet extends HttpServlet {
             // Registrar visualización de la empresa en el historial
             searchService.recordView(userId, cvId);
 
-            boolean accepted=applicationAccess||new com.cvmanager.services.ProfileService().contactAccepted(graduate.getGraduateId(),userId);
+            com.cvmanager.services.ProfileService profileService = new com.cvmanager.services.ProfileService();
+            boolean accepted=applicationAccess||profileService.contactAccepted(graduate.getGraduateId(),userId);
+            String contactStatus = applicationAccess ? "accepted" : profileService.contactStatus(graduate.getGraduateId(), userId);
+            com.cvmanager.models.User gradUser = new com.cvmanager.dao.impl.UsuarioDAOImpl().findById(graduate.getUserId());
+            request.setAttribute("graduateEmail", gradUser != null ? gradUser.getEmail() : "");
             request.setAttribute("contactAccepted",accepted);
+            request.setAttribute("contactStatus", contactStatus);
             request.setAttribute("cv", curriculum);
             request.setAttribute("graduate", graduate);
             request.setAttribute("education", curriculumDAO.section("educacion", "cv_id", cvId));
