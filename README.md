@@ -83,14 +83,6 @@ mvn -Pintegration verify
 
 Incluye 18 pruebas de integración, para un total de 47, y genera el WAR. Antes de ejecutarlo, importar el esquema en una base aislada cuyo nombre termine en `_test` y apuntar las variables `CVMANAGER_DB_*` a ella. Las pruebas de escritura crean usuarios con identificadores únicos y los eliminan al terminar. No usar una base productiva.
 
-También se incluye `scripts/smoke_test.py`, que verifica los flujos HTTP reales en un Tomcat local aislado:
-
-```text
-python scripts/smoke_test.py --isolated --base http://127.0.0.1:18081/cvmanager
-```
-
-La instancia de pruebas debe tener esquema importado y `CVMANAGER_SETUP_TOKEN` configurado. Crear `target/test-config.json` con el campo `setupToken` de esa instancia. En una base vacía el script crea su administrador y guarda las credenciales de prueba en ese archivo ignorado por Git. Las ejecuciones posteriores reutilizan ese administrador y crean cuentas de prueba nuevas. Los archivos deben apuntar a una carpeta de pruebas independiente. El resultado se guarda en `target/http-test-results.json`.
-
 ## Estructura
 
 - `src/main/java/com/cvmanager/controllers`: rutas y formularios.
@@ -100,7 +92,6 @@ La instancia de pruebas debe tener esquema importado y `CVMANAGER_SETUP_TOKEN` c
 - `src/main/webapp/WEB-INF/views`: vistas protegidas.
 - `database/migrations`: actualización incremental.
 - `src/test`: pruebas unitarias y de integración.
-- `scripts/smoke_test.py`: pruebas de flujos sobre HTTP.
 
 Las guías de IDE están en `docs/GUIA_ECLIPSE.md` y `docs/GUIA_NETBEANS_TOMCAT11.md`. La matriz de temas, evidencias y guion de sustentación está en `docs/CUMPLIMIENTO_SILABO.md`.
 

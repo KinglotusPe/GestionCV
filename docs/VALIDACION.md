@@ -17,7 +17,6 @@ Fecha: 8 de octubre de 2026.
 | --- | --- |
 | `mvn test` | 21 pruebas unitarias aprobadas. |
 | `mvn -Pintegration verify` | 32 pruebas aprobadas, 0 fallos y 0 errores. Incluye las 21 unitarias. |
-| `python scripts/smoke_test.py --isolated` | 104 comprobaciones HTTP aprobadas contra Tomcat y MySQL reales. |
 | Empaquetado Maven | WAR generado en `target/cvmanager.war`. |
 | Pantalla de acceso | Revisada visualmente en navegador. |
 

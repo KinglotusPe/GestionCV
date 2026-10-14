@@ -76,6 +76,6 @@ Las carpetas `uploads/photos` y `uploads/cvs` están representadas en el código
 
 ## Validación
 
-Compilar con `mvn -Pintegration verify` sobre la base aislada y ejecutar `python scripts/smoke_test.py --isolated`. El perfil `eclipse,integration` comprueba la compilación con ECJ. Al migrar desde el paquete anterior, utilizar una compilación limpia de clases y un WAR nuevo para no mezclar ambos paquetes. No eliminar el `target` completo si contiene la base de pruebas; retirar únicamente los directorios generados de compilación.
+Compilar con `mvn -Pintegration verify` sobre la base aislada. El perfil `eclipse,integration` comprueba la compilación con ECJ. Al migrar desde el paquete anterior, utilizar una compilación limpia de clases y un WAR nuevo para no mezclar ambos paquetes. No eliminar el `target` completo si contiene la base de pruebas; retirar únicamente los directorios generados de compilación.
 
 Resultado verificado: 78 nombres de archivo del árbol presentes, 47 pruebas Java y 157 verificaciones HTTP aprobadas. La comprobación del WAR confirma que no incluye clases residuales del paquete anterior.
