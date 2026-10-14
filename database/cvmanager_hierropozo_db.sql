@@ -338,3 +338,50 @@ CREATE TABLE IF NOT EXISTS empresa_revisiones (
  FOREIGN KEY(company_id) REFERENCES empresas(company_id) ON DELETE CASCADE,
  FOREIGN KEY(actor_id) REFERENCES usuarios(user_id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
+
+-- ----------------------------------------------------------------------------
+-- DATOS INICIALES: CUENTAS DE DEMOSTRACIÓN Y PRUEBAS (ROLES ACTIVOS)
+-- ----------------------------------------------------------------------------
+
+-- 1. Administrador Institucional
+-- Correo: admin@hierropozo.edu.pe | Contraseña: Admin123!
+INSERT INTO usuarios (email, password_hash, role, status)
+VALUES ('admin@hierropozo.edu.pe', '$2a$12$ya.X2UXOe.0rxLNyBGjiVOH771VynXu3WKsckD1CHgIEAZumbsah6', 'admin', 'active')
+ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), status='active';
+
+-- 2. Egresado
+-- Correo: egresado@hierropozo.edu.pe | Contraseña: Egresado123!
+INSERT INTO usuarios (email, password_hash, role, status)
+VALUES ('egresado@hierropozo.edu.pe', '$2a$12$35/.ANNbvmi4Wca5Mfbo4uOpORAvocfKrx.eH4xgie3TBctV7HXCK', 'graduate', 'active')
+ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), status='active';
+
+SET @grad_user_id = (SELECT user_id FROM usuarios WHERE email = 'egresado@hierropozo.edu.pe');
+
+INSERT INTO egresados (user_id, first_name, last_name, document_type, document_number, phone, city, career_id, graduation_year, is_public)
+VALUES (@grad_user_id, 'Juan', 'Pérez Quispe', 'DNI', '71234567', '966123456', 'Ayacucho', 1, 2024, TRUE)
+ON DUPLICATE KEY UPDATE phone=VALUES(phone), is_public=TRUE;
+
+SET @graduate_id = (SELECT graduate_id FROM egresados WHERE user_id = @grad_user_id);
+
+INSERT INTO cv (graduate_id, title, professional_summary, is_published)
+VALUES (@graduate_id, 'Técnico en Redes y Telecomunicaciones', 'Egresado del IESP Manuel Antonio Hierro Pozo especializado en conectividad, redes de datos y soporte computacional.', TRUE)
+ON DUPLICATE KEY UPDATE title=VALUES(title), is_published=TRUE;
+
+-- 3. Empresa
+-- Correo: empresa@hierropozo.edu.pe | Contraseña: Empresa123!
+INSERT INTO usuarios (email, password_hash, role, status)
+VALUES ('empresa@hierropozo.edu.pe', '$2a$12$CxmwgpxLIJUkTFSBt3pyg.jEsfApp0frN0PXiGb9VxyswncB6GYx.', 'company', 'active')
+ON DUPLICATE KEY UPDATE password_hash=VALUES(password_hash), status='active';
+
+SET @comp_user_id = (SELECT user_id FROM usuarios WHERE email = 'empresa@hierropozo.edu.pe');
+
+INSERT INTO empresas (user_id, company_name, ruc, industry, company_size, phone, website)
+VALUES (@comp_user_id, 'Tech Solutions Ayacucho S.A.C.', '20601234567', 'Tecnología e Informática', 'Mediana', '966987654', 'https://techsolutions.pe')
+ON DUPLICATE KEY UPDATE company_name=VALUES(company_name);
+
+SET @company_id = (SELECT company_id FROM empresas WHERE user_id = @comp_user_id);
+
+INSERT INTO vacantes (company_id, career_id, title, description, city, modality, salary, status)
+VALUES (@company_id, 1, 'Técnico de Soporte TI y Redes', 'Empresa líder en soluciones informáticas requiere técnico egresado para mantenimiento de infraestructura de redes.', 'Ayacucho', 'onsite', 'S/ 1,500 - 1,800', 'open')
+ON DUPLICATE KEY UPDATE title=VALUES(title);
+

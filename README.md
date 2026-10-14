@@ -17,6 +17,16 @@ Java 17+, Maven, Tomcat 11 (Servlet 6.1 / JSP 4.0), JSTL 3, MySQL 8, JDBC con po
 
 El registro de egresados y empresas requiere activación administrativa. Los nuevos perfiles necesarios para un cambio de rol se crean en la misma transacción; los datos de roles anteriores se conservan. No se permite retirar el acceso al administrador que está realizando la operación ni al último administrador activo.
 
+## 🔑 Credenciales de Acceso para Pruebas / Demostración
+
+Para que el docente, compañeros y evaluadores puedan probar todas las funciones de inmediato, la base de datos incluye cuentas precargadas y activas para los tres roles:
+
+| Rol | Correo Electrónico | Contraseña | Destino al ingresar |
+| :--- | :--- | :--- | :--- |
+| **Administrador** | `admin@hierropozo.edu.pe` | `Admin123!` | `/admin/dashboard` |
+| **Egresado** | `egresado@hierropozo.edu.pe` | `Egresado123!` | `/graduate/profile` |
+| **Empresa** | `empresa@hierropozo.edu.pe` | `Empresa123!` | `/company/search` |
+
 ### Contacto y privacidad
 
 - La búsqueda y el acceso ordinario al CV requieren perfil público, CV publicado y cuenta activa de egresado.
