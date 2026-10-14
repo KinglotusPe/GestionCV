@@ -10,7 +10,7 @@ import com.cvmanager.dao.interfaces.*;
 import com.cvmanager.dao.impl.*;
 import com.cvmanager.utils.ArchivoUtil;
 
-@WebServlet(urlPatterns={"/graduate/jobs","/company/jobs","/admin/jobs"})
+@WebServlet(urlPatterns={"/jobs","/graduate/jobs","/company/jobs","/admin/jobs"})
 @MultipartConfig(maxFileSize=5*1024*1024,maxRequestSize=6*1024*1024,fileSizeThreshold=1024*1024)
 public class JobsServlet extends HttpServlet {
     private final JobService service=new JobService();
@@ -18,7 +18,17 @@ public class JobsServlet extends HttpServlet {
     private String role(HttpServletRequest req){return (String)req.getSession().getAttribute("role");}
     private int actor(HttpServletRequest req){return (Integer)req.getSession().getAttribute("userId");}
     @Override protected void doGet(HttpServletRequest req,HttpServletResponse res)throws ServletException,IOException {
-        int actor=actor(req);String role=role(req);
+        HttpSession session=req.getSession(false);
+        if(session==null||session.getAttribute("userId")==null){
+            res.sendRedirect(req.getContextPath()+"/login?auth=1");
+            return;
+        }
+        String role=role(req);
+        if("/jobs".equals(req.getServletPath())){
+            res.sendRedirect(req.getContextPath()+"/"+role+"/jobs");
+            return;
+        }
+        int actor=actor(req);
         try {
             if(req.getParameter("document")!=null) {
                 try {
