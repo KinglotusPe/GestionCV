@@ -25,43 +25,75 @@ public class RegistrationDAOImpl implements RegistrationDAO {
      * Si alguna operación falla, se ejecuta rollback.
      */
     public void register(String email, String passwordHash, String role, String firstName, String lastName, String companyName) throws Exception {
+        if ("graduate".equals(role)) {
+            Egresados g = new Egresados();
+            g.setFirstName(firstName);
+            g.setLastName(lastName);
+            registerGraduate(email, passwordHash, g);
+        } else {
+            java.util.Map<String, String> data = new java.util.HashMap<>();
+            data.put("companyName", companyName);
+            registerCompany(email, passwordHash, data);
+        }
+    }
+
+    public void registerGraduate(String email, String passwordHash, Egresados graduate) throws Exception {
         try (Connection connection = DBConnection.getConnection()) {
             connection.setAutoCommit(false);
             try {
-                // 1. Crear usuario base
                 User user = new User();
                 user.setEmail(email);
                 user.setPasswordHash(passwordHash);
-                user.setRole(role);
-                user.setStatus("pending"); // Requiere activación inicial
+                user.setRole("graduate");
+                user.setStatus("pending");
+
+                int userId = userDAO.create(connection, user);
+                graduate.setUserId(userId);
+                int graduateId = graduateDAO.create(connection, graduate);
+
+                String sqlCV = "INSERT INTO cv(graduate_id, title) VALUES(?, 'Mi Currículum Vitae')";
+                try (PreparedStatement cvStmt = connection.prepareStatement(sqlCV)) {
+                    cvStmt.setInt(1, graduateId);
+                    cvStmt.executeUpdate();
+                }
+
+                connection.commit();
+            } catch (Exception e) {
+                connection.rollback();
+                throw e;
+            } finally {
+                connection.setAutoCommit(true);
+            }
+        }
+    }
+
+    public void registerCompany(String email, String passwordHash, java.util.Map<String, String> data) throws Exception {
+        try (Connection connection = DBConnection.getConnection()) {
+            connection.setAutoCommit(false);
+            try {
+                User user = new User();
+                user.setEmail(email);
+                user.setPasswordHash(passwordHash);
+                user.setRole("company");
+                user.setStatus("pending");
 
                 int userId = userDAO.create(connection, user);
 
-                // 2. Crear perfil dependiente
-                if ("graduate".equals(role)) {
-                    Egresados graduate = new Egresados();
-                    graduate.setUserId(userId);
-                    graduate.setFirstName(firstName);
-                    graduate.setLastName(lastName);
-                    int graduateId = graduateDAO.create(connection, graduate);
-
-                    // Inicializar cabecera del CV para el nuevo egresado
-                    String sqlCV = "INSERT INTO cv(graduate_id, title) VALUES(?, 'Mi Currículum Vitae')";
-                    try (PreparedStatement cvStmt = connection.prepareStatement(sqlCV)) {
-                        cvStmt.setInt(1, graduateId);
-                        cvStmt.executeUpdate();
-                    }
-                } else {
-                    // Perfil de empresa
-                    String sqlCompany = "INSERT INTO empresas(user_id, company_name) VALUES(?, ?)";
-                    try (PreparedStatement companyStmt = connection.prepareStatement(sqlCompany)) {
-                        companyStmt.setInt(1, userId);
-                        companyStmt.setString(2, companyName);
-                        companyStmt.executeUpdate();
-                    }
+                String sql = "INSERT INTO empresas(user_id, company_name, trade_name, ruc, industry, phone, address, representative_name, representative_dni, representative_position) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                try (PreparedStatement st = connection.prepareStatement(sql)) {
+                    st.setInt(1, userId);
+                    st.setString(2, data.get("companyName"));
+                    st.setString(3, data.get("tradeName"));
+                    st.setString(4, data.get("ruc"));
+                    st.setString(5, data.get("industry"));
+                    st.setString(6, data.get("phone"));
+                    st.setString(7, data.get("address"));
+                    st.setString(8, data.get("representativeName"));
+                    st.setString(9, data.get("representativeDni"));
+                    st.setString(10, data.get("representativePosition"));
+                    st.executeUpdate();
                 }
 
-                // Confirmar transacción
                 connection.commit();
             } catch (Exception e) {
                 connection.rollback();

@@ -7,12 +7,50 @@ import com.cvmanager.utils.DBConnection;
 /** Consultas de perfiles, consentimiento de contacto y referencias a archivos. */
 public class ProfileDAOImpl implements ProfileDAO {
  public Map<String,Object> company(int userId)throws SQLException {
-  var rows=JobDAOImpl.rows("SELECT company_name,ruc,industry,company_size,phone,website,description FROM empresas WHERE user_id=?",userId);
+  var rows=JobDAOImpl.rows("SELECT e.*, u.status AS user_status FROM empresas e JOIN usuarios u ON u.user_id=e.user_id WHERE e.user_id=?",userId);
   return rows.isEmpty()?null:rows.get(0);
  }
  public void saveCompany(int userId,Map<String,String> values)throws SQLException {
   try(Connection c=DBConnection.getConnection()){
-   if(JobDAOImpl.update(c,"UPDATE empresas SET company_name=?,ruc=?,industry=?,company_size=?,phone=?,website=?,description=? WHERE user_id=?",values.get("companyName"),values.get("ruc"),values.get("industry"),values.get("companySize"),values.get("phone"),values.get("website"),values.get("description"),userId)!=1)throw new IllegalArgumentException("Empresa inexistente.");
+   var existing = company(userId);
+   if (existing == null) throw new IllegalArgumentException("Empresa inexistente.");
+   String userStatus = (String) existing.get("user_status");
+   boolean isApproved = "active".equals(userStatus);
+
+   String companyName = (String) existing.get("company_name");
+   String ruc = (String) existing.get("ruc");
+
+   if (isApproved) {
+       String submittedRuc = values.get("ruc");
+       if (submittedRuc != null && ruc != null && !submittedRuc.trim().equals(ruc.trim())) {
+           throw new IllegalArgumentException("No se permite modificar el RUC de una empresa ya aprobada y verificada.");
+       }
+       String submittedName = values.get("companyName");
+       if (submittedName != null && companyName != null && !submittedName.trim().equalsIgnoreCase(companyName.trim())) {
+           throw new IllegalArgumentException("No se permite modificar la Razón Social de una empresa ya aprobada.");
+       }
+   } else {
+       if (values.get("companyName") != null && !values.get("companyName").isBlank()) companyName = values.get("companyName");
+       if (values.get("ruc") != null && !values.get("ruc").isBlank()) ruc = values.get("ruc");
+   }
+
+   String sql = "UPDATE empresas SET company_name=?, ruc=?, trade_name=?, industry=?, company_size=?, phone=?, address=?, website=?, description=?, representative_name=?, representative_dni=?, representative_position=? WHERE user_id=?";
+   if(JobDAOImpl.update(c, sql,
+       companyName,
+       ruc,
+       values.get("tradeName"),
+       values.get("industry"),
+       values.get("companySize"),
+       values.get("phone"),
+       values.get("address"),
+       values.get("website"),
+       values.get("description"),
+       values.get("representativeName"),
+       values.get("representativeDni"),
+       values.get("representativePosition"),
+       userId) != 1) {
+       throw new IllegalArgumentException("Empresa inexistente.");
+   }
   }
  }
  public List<Map<String,Object>> requests(int userId)throws SQLException {

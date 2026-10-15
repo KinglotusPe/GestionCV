@@ -12,8 +12,14 @@ public class JobService {
  public void save(int userId,Integer id,Map<String,String> p)throws SQLException{String career=p.get("careerId");new LaborPortalService().save(userId,"company",id,p,career==null?null:new String[]{career});}
  public void apply(int userId,int jobId,String message)throws SQLException{dao.apply(userId,jobId,ValidacionUtil.text(message,"Presentación",5000,true));}
  public void respond(int userId,boolean company,int id,String status)throws SQLException{
-        if(status==null||!(company?Set.of("pending","reviewing","accepted","rejected"):Set.of("withdrawn")).contains(status))throw new IllegalArgumentException("Estado inválido.");
-  dao.respond(userId,company,id,status);
+     Set<String> validCompanyStatuses = Set.of(
+         "POSTULADO","EN_REVISION","PRESELECCIONADO","ENTREVISTA","SELECCIONADO","NO_SELECCIONADO",
+         "pending","reviewing","accepted","rejected"
+     );
+     Set<String> validGraduateStatuses = Set.of("RETIRADO","withdrawn");
+     if(status==null||!(company?validCompanyStatuses:validGraduateStatuses).contains(status.trim()))
+         throw new IllegalArgumentException("Estado de postulación no válido.");
+     dao.respond(userId,company,id,status.trim());
  }
  public boolean canReadCv(int companyUserId,int cvId)throws SQLException{return dao.canReadCv(companyUserId,cvId);}
 }

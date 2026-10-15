@@ -43,27 +43,94 @@
                     </div>
                 </div>
 
-                <!-- Campos específicos para Egresados -->
-                <div class="graduate-fields">
+                <!-- Campos específicos para Estudiantes y Egresados -->
+                <div class="graduate-fields" id="graduateFields">
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Nombres</label>
-                            <input class="form-control" type="text" name="firstName" placeholder="Nombres completos">
+                            <label class="form-label fw-bold">DNI <span class="text-danger">*</span></label>
+                            <input class="form-control" type="text" name="documentNumber" id="gradDni" placeholder="8 dígitos" maxlength="8" pattern="[0-9]{8}">
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Apellidos</label>
-                            <input class="form-control" type="text" name="lastName" placeholder="Apellidos completos">
+                            <label class="form-label fw-bold">Celular</label>
+                            <input class="form-control" type="tel" name="phone" placeholder="987654321" maxlength="15">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Nombres <span class="text-danger">*</span></label>
+                            <input class="form-control" type="text" name="firstName" id="gradFirstName" placeholder="Nombres completos">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Apellidos <span class="text-danger">*</span></label>
+                            <input class="form-control" type="text" name="lastName" id="gradLastName" placeholder="Apellidos completos">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Código Institucional</label>
+                            <input class="form-control" type="text" name="institutionalCode" placeholder="Ej. 2024-HP-0123" maxlength="30">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Estado Académico</label>
+                            <select class="form-select" name="academicStatus">
+                                <option value="ESTUDIANTE">ESTUDIANTE (Cursando)</option>
+                                <option value="EGRESADO" selected>EGRESADO (Concluido)</option>
+                            </select>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-bold">Programa de Estudios / Carrera</label>
+                            <select class="form-select" name="careerId">
+                                <option value="">Seleccione su carrera...</option>
+                                <c:forEach var="car" items="${careers}">
+                                    <option value="${car.careerId}"><c:out value="${car.name}"/></option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Año de Ingreso</label>
+                            <input class="form-control" type="number" name="entryYear" placeholder="Ej. 2022" min="1990" max="2035">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Año de Egreso (si aplica)</label>
+                            <input class="form-control" type="number" name="graduationYear" placeholder="Ej. 2025" min="1990" max="2035">
                         </div>
                     </div>
                 </div>
 
                 <!-- Campos específicos para Empresas -->
-                <div class="company-fields" style="display: none;">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">Razón Social / Nombre Comercial</label>
-                        <div class="input-group">
-                            <span class="input-group-text"><i class="fa-solid fa-building"></i></span>
-                            <input class="form-control" type="text" name="companyName" placeholder="Nombre de la empresa">
+                <div class="company-fields" id="companyFields" style="display: none;">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">RUC <span class="text-danger">*</span></label>
+                            <input class="form-control" type="text" name="ruc" id="compRuc" placeholder="11 dígitos" maxlength="11" pattern="[0-9]{11}">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Teléfono / Celular</label>
+                            <input class="form-control" type="tel" name="phone" placeholder="Teléfono de contacto">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-bold">Razón Social <span class="text-danger">*</span></label>
+                            <input class="form-control" type="text" name="companyName" id="compName" placeholder="Razón social registrada en SUNAT">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Nombre Comercial</label>
+                            <input class="form-control" type="text" name="tradeName" placeholder="Nombre comercial (marca)">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Rubro / Sector</label>
+                            <input class="form-control" type="text" name="industry" placeholder="Ej. Tecnología, Minería, Educación">
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label fw-bold">Dirección Fiscal / Sede</label>
+                            <input class="form-control" type="text" name="address" placeholder="Av. / Jr. / Calle...">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Representante Legal</label>
+                            <input class="form-control" type="text" name="representativeName" placeholder="Nombres y apellidos del representante">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold">DNI Representante</label>
+                            <input class="form-control" type="text" name="representativeDni" placeholder="8 dígitos" maxlength="8">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label fw-bold">Cargo</label>
+                            <input class="form-control" type="text" name="representativePosition" placeholder="Ej. Gerente General">
                         </div>
                     </div>
                 </div>
@@ -74,6 +141,40 @@
                     </button>
                 </div>
             </form>
+            <script>
+            (function() {
+                const roleSelect = document.getElementById('role');
+                const gradFields = document.getElementById('graduateFields');
+                const compFields = document.getElementById('companyFields');
+                const gradDni = document.getElementById('gradDni');
+                const gradFirstName = document.getElementById('gradFirstName');
+                const gradLastName = document.getElementById('gradLastName');
+                const compRuc = document.getElementById('compRuc');
+                const compName = document.getElementById('compName');
+
+                function updateRole() {
+                    const isGrad = roleSelect.value === 'graduate';
+                    gradFields.style.display = isGrad ? 'block' : 'none';
+                    compFields.style.display = isGrad ? 'none' : 'block';
+
+                    if (isGrad) {
+                        gradDni.setAttribute('required', 'required');
+                        gradFirstName.setAttribute('required', 'required');
+                        gradLastName.setAttribute('required', 'required');
+                        compRuc.removeAttribute('required');
+                        compName.removeAttribute('required');
+                    } else {
+                        gradDni.removeAttribute('required');
+                        gradFirstName.removeAttribute('required');
+                        gradLastName.removeAttribute('required');
+                        compRuc.setAttribute('required', 'required');
+                        compName.setAttribute('required', 'required');
+                    }
+                }
+                roleSelect.addEventListener('change', updateRole);
+                updateRole();
+            })();
+            </script>
 
             <hr class="my-4">
 

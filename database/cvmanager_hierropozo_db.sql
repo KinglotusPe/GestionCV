@@ -45,6 +45,7 @@ CREATE TABLE IF NOT EXISTS egresados (
     last_name VARCHAR(100) NOT NULL,
     document_type VARCHAR(20) DEFAULT 'DNI',
     document_number VARCHAR(20) UNIQUE,
+    institutional_code VARCHAR(30) NULL,
     phone VARCHAR(30),
     address VARCHAR(180),
     city VARCHAR(80) DEFAULT 'Ayacucho',
@@ -55,6 +56,8 @@ CREATE TABLE IF NOT EXISTS egresados (
     portfolio_url VARCHAR(255),
     career_id INT NULL,
     graduation_year SMALLINT NULL,
+    entry_year SMALLINT NULL,
+    academic_status ENUM('ESTUDIANTE', 'EGRESADO') NOT NULL DEFAULT 'EGRESADO',
     is_public BOOLEAN NOT NULL DEFAULT TRUE,
     CONSTRAINT fk_grad_user FOREIGN KEY (user_id) REFERENCES usuarios(user_id) ON DELETE CASCADE,
     CONSTRAINT fk_grad_career FOREIGN KEY (career_id) REFERENCES carreras(career_id) ON DELETE SET NULL,
@@ -69,12 +72,17 @@ CREATE TABLE IF NOT EXISTS empresas (
     company_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL UNIQUE,
     company_name VARCHAR(150) NOT NULL,
+    trade_name VARCHAR(150) NULL,
     ruc VARCHAR(11) UNIQUE,
     industry VARCHAR(100),
     company_size VARCHAR(50),
     phone VARCHAR(30),
+    address VARCHAR(200) NULL,
     website VARCHAR(255),
     description TEXT,
+    representative_name VARCHAR(120) NULL,
+    representative_dni VARCHAR(20) NULL,
+    representative_position VARCHAR(80) NULL,
     logo_url VARCHAR(255),
     CONSTRAINT fk_company_user FOREIGN KEY (user_id) REFERENCES usuarios(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
@@ -274,7 +282,7 @@ CREATE TABLE IF NOT EXISTS vacantes (
  city VARCHAR(80) NOT NULL,
  modality ENUM('onsite','remote','hybrid') NOT NULL,
  salary VARCHAR(100),
- status ENUM('open','closed') NOT NULL DEFAULT 'open',
+ status ENUM('BORRADOR','PUBLICADA','PAUSADA','CERRADA','VENCIDA','open','closed') NOT NULL DEFAULT 'BORRADOR',
  closing_date DATE NULL,
  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -287,13 +295,26 @@ CREATE TABLE IF NOT EXISTS postulaciones (
  job_id INT NOT NULL,
  graduate_id INT NOT NULL,
  message TEXT NOT NULL,
- status ENUM('pending','reviewing','accepted','rejected','withdrawn') NOT NULL DEFAULT 'pending',
+ status ENUM('POSTULADO','EN_REVISION','PRESELECCIONADO','ENTREVISTA','SELECCIONADO','NO_SELECCIONADO','RETIRADO','pending','reviewing','accepted','rejected','withdrawn') NOT NULL DEFAULT 'POSTULADO',
  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
  UNIQUE KEY uk_job_graduate(job_id,graduate_id),
  CONSTRAINT fk_application_job FOREIGN KEY(job_id) REFERENCES vacantes(job_id) ON DELETE CASCADE,
  CONSTRAINT fk_application_graduate FOREIGN KEY(graduate_id) REFERENCES egresados(graduate_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+CREATE TABLE IF NOT EXISTS notificaciones (
+    notification_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    title VARCHAR(150) NOT NULL,
+    message TEXT NOT NULL,
+    type VARCHAR(50) NOT NULL DEFAULT 'SISTEMA',
+    reference_url VARCHAR(255) NULL,
+    is_read BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_notif_user FOREIGN KEY (user_id) REFERENCES usuarios(user_id) ON DELETE CASCADE,
+    INDEX idx_notif_user_read (user_id, is_read, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Bolsa laboral institucional
 -- Extensión aditiva y repetible. Ejecutar después de 002_jobs.sql.

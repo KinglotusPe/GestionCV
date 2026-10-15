@@ -25,6 +25,9 @@ public class Egresados {
     private String portfolioUrl;
     private boolean publicProfile;
     private String careerName; // Campo informativo obtenido de JOIN
+    private String institutionalCode;
+    private Integer entryYear;
+    private String academicStatus; // 'ESTUDIANTE' o 'EGRESADO'
 
     public Egresados() {
     }
@@ -176,6 +179,30 @@ public class Egresados {
 
     public void setCareerName(String careerName) {
         this.careerName = careerName;
+    }
+
+    public String getInstitutionalCode() {
+        return institutionalCode;
+    }
+
+    public void setInstitutionalCode(String institutionalCode) {
+        this.institutionalCode = institutionalCode;
+    }
+
+    public Integer getEntryYear() {
+        return entryYear;
+    }
+
+    public void setEntryYear(Integer entryYear) {
+        this.entryYear = entryYear;
+    }
+
+    public String getAcademicStatus() {
+        return academicStatus;
+    }
+
+    public void setAcademicStatus(String academicStatus) {
+        this.academicStatus = academicStatus;
     }
 
     @Override

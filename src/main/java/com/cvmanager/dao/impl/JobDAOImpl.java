@@ -9,16 +9,24 @@ import com.cvmanager.utils.ValidacionUtil;
 /** Persistencia de convocatorias y sus carreras; cada edición es atómica. */
 public class JobDAOImpl implements JobDAO {
     private static final String SELECT = "SELECT j.*,e.company_name,d.opening_date,d.shift_name,d.positions,d.requirements,d.benefits,d.conditions_text,d.external_url,d.managed_by,COALESCE(d.archived,0) AS archived, "
-        + "CASE WHEN d.archived=1 THEN 'archived' WHEN j.status='closed' OR j.closing_date<CURRENT_DATE THEN 'finished' WHEN d.opening_date>CURRENT_DATE THEN 'upcoming' ELSE 'ongoing' END AS stage, "
+        + "CASE "
+        + "WHEN d.archived=1 THEN 'archived' "
+        + "WHEN j.status='BORRADOR' THEN 'BORRADOR' "
+        + "WHEN j.status='PAUSADA' THEN 'PAUSADA' "
+        + "WHEN j.status='CERRADA' OR j.status='closed' THEN 'CERRADA' "
+        + "WHEN j.status='VENCIDA' OR (j.status IN ('PUBLICADA','open') AND j.closing_date IS NOT NULL AND j.closing_date<CURRENT_DATE) THEN 'VENCIDA' "
+        + "WHEN d.opening_date IS NOT NULL AND d.opening_date>CURRENT_DATE THEN 'upcoming' "
+        + "ELSE 'PUBLICADA' END AS stage, "
+        + "(SELECT COUNT(*) FROM postulaciones p WHERE p.job_id=j.job_id AND p.status NOT IN ('RETIRADO','withdrawn')) AS applicant_count, "
         + "(SELECT GROUP_CONCAT(c.name ORDER BY c.name SEPARATOR ', ') FROM vacante_carreras jc JOIN carreras c ON c.career_id=jc.career_id WHERE jc.job_id=j.job_id) AS career "
         + "FROM vacantes j JOIN empresas e ON e.company_id=j.company_id JOIN usuarios u ON u.user_id=e.user_id LEFT JOIN vacante_detalles d ON d.job_id=j.job_id ";
 
     public List<Map<String,Object>> list(int actor,String role,String query,String stage,String archive) throws SQLException {
-        String access=role.equals("admin")?"? > 0":role.equals("company")?"e.user_id=?":"? > 0 AND u.status='active' AND u.role='company' AND COALESCE(d.archived,0)=0";
+        String access=role.equals("admin")?"? > 0":role.equals("company")?"e.user_id=?":"? > 0 AND u.status='active' AND u.role='company' AND COALESCE(d.archived,0)=0 AND j.status IN ('PUBLICADA','open') AND (j.closing_date IS NULL OR j.closing_date>=CURRENT_DATE) AND (d.opening_date IS NULL OR d.opening_date<=CURRENT_DATE)";
         String sql=SELECT+"WHERE "+access+" AND (j.title LIKE ? OR j.description LIKE ? OR e.company_name LIKE ?)";
         String q="%"+ValidacionUtil.clean(query)+"%";
         List<Map<String,Object>> result=rows(sql+" ORDER BY j.created_at DESC,j.job_id DESC",actor,q,q,q);
-        return result.stream().filter(r-> stage==null||stage.isBlank()||stage.equals(r.get("stage")))
+        return result.stream().filter(r-> stage==null||stage.isBlank()||stage.equalsIgnoreCase(String.valueOf(r.get("stage"))))
             .filter(r->role.equals("graduate")||("yes".equals(archive)?r.get("stage").equals("archived"):!r.get("stage").equals("archived"))).toList();
     }
     public Map<String,Object> find(int actor,String role,int id) throws SQLException {
@@ -72,6 +80,14 @@ public class JobDAOImpl implements JobDAO {
         if(role.equals("admin")?(manager==null||((Number)manager).intValue()!=actor):manager!=null)
             throw new IllegalArgumentException("Solo quien administra la convocatoria puede editarla.");
         return result.get(0);
+    }
+    public void updateStatus(int actor,String role,int id,String status) throws SQLException {
+        if(!Set.of("BORRADOR","PUBLICADA","PAUSADA","CERRADA","VENCIDA").contains(status))
+            throw new IllegalArgumentException("Estado de convocatoria no válido.");
+        try(Connection c=DBConnection.getConnection()) {
+            lockOwned(c,actor,role,id);
+            update(c,"UPDATE vacantes SET status=? WHERE job_id=?",status,id);
+        }
     }
     public static Object nullable(String value){return value==null||value.isBlank()?null:value;}
     private static Object[] append(Object[] values,Object last){Object[] result=Arrays.copyOf(values,values.length+1);result[values.length]=last;return result;}

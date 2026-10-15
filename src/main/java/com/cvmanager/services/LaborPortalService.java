@@ -14,7 +14,18 @@ public class LaborPortalService {
         Map<String,String> p=new HashMap<>(input);
         for(String field:List.of("title","description","city","salary","requirements","benefits","conditions"))
             p.put(field,ValidacionUtil.text(p.get(field),switch(field){case "title"->"Título";case "city"->"Lugar de trabajo";default->field;},switch(field){case "title"->150;case "city"->80;case "salary"->100;default->10000;},Set.of("title","description","city").contains(field)));
-        if(!Set.of("onsite","remote","hybrid").contains(Objects.toString(p.get("modality"),""))||!Set.of("open","closed").contains(Objects.toString(p.get("status"),"")))throw new IllegalArgumentException("Modalidad o estado inválidos.");
+        
+        String modality = Objects.toString(p.get("modality"),"");
+        if(!Set.of("onsite","remote","hybrid").contains(modality)) throw new IllegalArgumentException("Modalidad de trabajo inválida.");
+
+        String status = Objects.toString(p.get("status"),"").trim();
+        if(status.equalsIgnoreCase("open")) status = "PUBLICADA";
+        if(status.equalsIgnoreCase("closed")) status = "CERRADA";
+        if(status.isBlank()) status = "PUBLICADA";
+        if(!Set.of("BORRADOR","PUBLICADA","PAUSADA","CERRADA","VENCIDA").contains(status))
+            throw new IllegalArgumentException("Estado de convocatoria no válido.");
+        p.put("status", status);
+
         p.put("shift",ValidacionUtil.text(p.getOrDefault("shift","Completo"),"Turno",40,true));
         p.put("positions",String.valueOf(ValidacionUtil.integer(p.getOrDefault("positions","1"),"Vacantes",1,10000)));
         ValidacionUtil.dates(p.get("openingDate"),p.get("closingDate"));
@@ -26,6 +37,10 @@ public class LaborPortalService {
         List<Integer> careers=new ArrayList<>();
         if(selected!=null)for(String value:selected)if(!value.isBlank())careers.add(ValidacionUtil.integer(value,"Carrera",1,Integer.MAX_VALUE));
         new JobDAOImpl().save(actor,role,id,validate(input),careers.stream().distinct().toList());
+    }
+    public void updateJobStatus(int actor,String role,int id,String status)throws SQLException {
+        if(!Set.of("company","admin").contains(role))throw new IllegalArgumentException("No tiene permisos para modificar la convocatoria.");
+        new JobDAOImpl().updateStatus(actor,role,id,status);
     }
     private final LaborPortalDAO dao=new LaborPortalDAOImpl();
     public void archive(int actor,String role,int job,boolean archive)throws SQLException{dao.archive(actor,role,job,archive);}

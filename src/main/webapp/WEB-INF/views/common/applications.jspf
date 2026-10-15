@@ -28,74 +28,156 @@
                     </div>
                     <div>
                         <c:choose>
-                            <c:when test="${a.status == 'pending'}">
-                                <span class="badge bg-warning text-dark px-3 py-2"><i class="fa-solid fa-hourglass-half me-1"></i> Pendiente</span>
+                            <c:when test="${a.status == 'POSTULADO' or a.status == 'pending'}">
+                                <span class="badge bg-warning text-dark px-3 py-2"><i class="fa-solid fa-hourglass-half me-1"></i> Postulado</span>
                             </c:when>
-                            <c:when test="${a.status == 'reviewing'}">
-                                <span class="badge bg-info text-dark px-3 py-2"><i class="fa-solid fa-spinner me-1"></i> En evaluación</span>
+                            <c:when test="${a.status == 'EN_REVISION' or a.status == 'reviewing'}">
+                                <span class="badge bg-info text-dark px-3 py-2"><i class="fa-solid fa-spinner me-1"></i> En revisión</span>
                             </c:when>
-                            <c:when test="${a.status == 'accepted'}">
-                                <span class="badge bg-success px-3 py-2"><i class="fa-solid fa-circle-check me-1"></i> ¡Aceptado / Seleccionado!</span>
+                            <c:when test="${a.status == 'PRESELECCIONADO'}">
+                                <span class="badge bg-primary px-3 py-2"><i class="fa-solid fa-star me-1"></i> Preseleccionado</span>
                             </c:when>
-                            <c:when test="${a.status == 'rejected'}">
+                            <c:when test="${a.status == 'ENTREVISTA'}">
+                                <span class="badge text-white px-3 py-2" style="background-color: #6f42c1;"><i class="fa-solid fa-calendar-check me-1"></i> Convocado a Entrevista</span>
+                            </c:when>
+                            <c:when test="${a.status == 'SELECCIONADO' or a.status == 'accepted'}">
+                                <span class="badge bg-success px-3 py-2"><i class="fa-solid fa-circle-check me-1"></i> ¡Seleccionado!</span>
+                            </c:when>
+                            <c:when test="${a.status == 'NO_SELECCIONADO' or a.status == 'rejected'}">
                                 <span class="badge bg-danger px-3 py-2"><i class="fa-solid fa-ban me-1"></i> No seleccionado</span>
                             </c:when>
                             <c:otherwise>
-                                <span class="badge bg-secondary px-3 py-2">Retirada</span>
+                                <span class="badge bg-secondary px-3 py-2"><i class="fa-solid fa-arrow-rotate-left me-1"></i> Retirada</span>
                             </c:otherwise>
                         </c:choose>
                     </div>
                 </div>
 
-                <!-- Si el usuario es el egresado y la empresa lo acepto, mostramos el banner de celebracion y datos de contacto directo de la empresa -->
-                <c:if test="${not companyMode and a.status == 'accepted'}">
-                    <div class="alert alert-success border-success mt-2 mb-3 p-3">
-                        <div class="d-flex align-items-center mb-2">
-                            <i class="fa-solid fa-award fa-2x text-success me-3"></i>
-                            <div>
-                                <h5 class="alert-heading mb-0 fw-bold">¡Felicitaciones! Has sido aceptado para este puesto</h5>
-                                <small>La empresa ha aprobado tu postulación. Comunícate directamente con ellos para continuar tu proceso de incorporación.</small>
+                <!-- Notificaciones en tarjeta para el estudiante/egresado segun el estado -->
+                <c:if test="${not companyMode}">
+                    <c:choose>
+                        <c:when test="${a.status == 'SELECCIONADO' or a.status == 'accepted'}">
+                            <div class="alert alert-success border-success mt-2 mb-3 p-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fa-solid fa-award fa-2x text-success me-3"></i>
+                                    <div>
+                                        <h5 class="alert-heading mb-0 fw-bold">¡Felicitaciones! Has sido seleccionado para este puesto</h5>
+                                        <small>La empresa ha aprobado tu postulación. Comunícate directamente con ellos para coordinar tu incorporación.</small>
+                                    </div>
+                                </div>
+                                <hr class="my-2">
+                                <div class="row g-2 align-items-center">
+                                    <c:if test="${not empty a.company_email}">
+                                        <div class="col-auto">
+                                            <a href="mailto:${a.company_email}" class="btn btn-sm btn-outline-success">
+                                                <i class="fa-solid fa-envelope me-1"></i> <c:out value="${a.company_email}"/>
+                                            </a>
+                                        </div>
+                                    </c:if>
+                                    <c:if test="${not empty a.company_phone}">
+                                        <div class="col-auto">
+                                            <a href="https://wa.me/51${a.company_phone}" target="_blank" class="btn btn-sm btn-success">
+                                                <i class="fa-brands fa-whatsapp me-1"></i> WhatsApp: <c:out value="${a.company_phone}"/>
+                                            </a>
+                                        </div>
+                                    </c:if>
+                                    <c:if test="${not empty a.job_city}">
+                                        <div class="col-auto text-muted small">
+                                            <i class="fa-solid fa-location-dot me-1"></i> Sede / Ciudad: <c:out value="${a.job_city}"/>
+                                        </div>
+                                    </c:if>
+                                </div>
                             </div>
-                        </div>
-                        <hr class="my-2">
-                        <div class="row g-2 align-items-center">
-                            <c:if test="${not empty a.company_email}">
-                                <div class="col-auto">
-                                    <a href="mailto:${a.company_email}" class="btn btn-sm btn-outline-success">
-                                        <i class="fa-solid fa-envelope me-1"></i> <c:out value="${a.company_email}"/>
-                                    </a>
+                        </c:when>
+                        <c:when test="${a.status == 'ENTREVISTA'}">
+                            <div class="alert alert-primary border-primary mt-2 mb-3 p-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fa-solid fa-calendar-check fa-2x text-primary me-3"></i>
+                                    <div>
+                                        <h5 class="alert-heading mb-0 fw-bold">¡Has sido invitado a una entrevista laboral!</h5>
+                                        <small>La empresa desea entrevistarte. Mantente atento a tu correo/WhatsApp o comunícate a través de los canales proporcionados.</small>
+                                    </div>
                                 </div>
-                            </c:if>
-                            <c:if test="${not empty a.company_phone}">
-                                <div class="col-auto">
-                                    <a href="https://wa.me/51${a.company_phone}" target="_blank" class="btn btn-sm btn-success">
-                                        <i class="fa-brands fa-whatsapp me-1"></i> WhatsApp: <c:out value="${a.company_phone}"/>
-                                    </a>
+                                <hr class="my-2">
+                                <div class="row g-2 align-items-center">
+                                    <c:if test="${not empty a.company_email}">
+                                        <div class="col-auto">
+                                            <a href="mailto:${a.company_email}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fa-solid fa-envelope me-1"></i> <c:out value="${a.company_email}"/>
+                                            </a>
+                                        </div>
+                                    </c:if>
+                                    <c:if test="${not empty a.company_phone}">
+                                        <div class="col-auto">
+                                            <a href="https://wa.me/51${a.company_phone}" target="_blank" class="btn btn-sm btn-primary">
+                                                <i class="fa-brands fa-whatsapp me-1"></i> WhatsApp: <c:out value="${a.company_phone}"/>
+                                            </a>
+                                        </div>
+                                    </c:if>
                                 </div>
-                            </c:if>
-                            <c:if test="${not empty a.job_city}">
-                                <div class="col-auto text-muted small">
-                                    <i class="fa-solid fa-location-dot me-1"></i> Sede / Ciudad: <c:out value="${a.job_city}"/>
+                            </div>
+                        </c:when>
+                        <c:when test="${a.status == 'PRESELECCIONADO'}">
+                            <div class="alert alert-info border-info mt-2 mb-3 p-3">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa-solid fa-star fa-2x text-info me-3"></i>
+                                    <div>
+                                        <h5 class="alert-heading mb-0 fw-bold">Postulación Preseleccionada</h5>
+                                        <small>Tu perfil cumplió con los requisitos preliminares de la empresa y se encuentra en la terna final de evaluación.</small>
+                                    </div>
                                 </div>
-                            </c:if>
-                        </div>
-                    </div>
+                            </div>
+                        </c:when>
+                    </c:choose>
                 </c:if>
 
-                <!-- Si el usuario es empresa, mostramos los datos del postulante -->
+                <!-- Si el usuario es empresa, mostramos los datos del postulante con privacidad estricta -->
                 <c:if test="${companyMode}">
-                    <div class="p-2 mb-2 bg-light rounded d-flex flex-wrap justify-content-between align-items-center gap-2">
-                        <div>
-                            <strong><i class="fa-solid fa-user me-1"></i> Candidato:</strong> <c:out value="${a.first_name} ${a.last_name}"/>
-                            <c:if test="${not empty a.email}"> · <i class="fa-solid fa-envelope me-1"></i> <a href="mailto:${a.email}"><c:out value="${a.email}"/></a></c:if>
-                            <c:if test="${not empty a.phone}"> · <i class="fa-solid fa-phone me-1"></i> <c:out value="${a.phone}"/></c:if>
+                    <div class="p-3 mb-2 bg-light rounded border">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-2">
+                            <div>
+                                <h5 class="h6 mb-1 text-dark">
+                                    <i class="fa-solid fa-user me-1 text-secondary"></i> <strong><c:out value="${a.first_name} ${a.last_name}"/></strong>
+                                </h5>
+                                <c:if test="${not empty a.career_name}">
+                                    <span class="badge bg-white text-dark border me-2">
+                                        <i class="fa-solid fa-graduation-cap me-1 text-success"></i> <c:out value="${a.career_name}"/>
+                                    </span>
+                                </c:if>
+                            </div>
+                            <div>
+                                <c:if test="${a.status != 'withdrawn' and a.status != 'RETIRADO' and not empty a.cv_id}">
+                                    <a class="btn btn-sm btn-outline-primary" href="${pageContext.request.contextPath}/company/cv?id=${a.cv_id}">
+                                        <i class="fa-regular fa-file-pdf me-1"></i> Ver CV completo
+                                    </a>
+                                </c:if>
+                            </div>
                         </div>
-                        <div>
-                            <c:if test="${a.status != 'withdrawn' and not empty a.cv_id}">
-                                <a class="btn btn-sm btn-outline-primary" href="${pageContext.request.contextPath}/company/cv?id=${a.cv_id}">
-                                    <i class="fa-regular fa-file-pdf me-1"></i> Ver CV completo
-                                </a>
-                            </c:if>
+
+                        <c:if test="${not empty a.professional_summary}">
+                            <div class="p-2 mb-2 bg-white rounded border-start border-3 border-success small text-muted">
+                                <strong>Perfil:</strong> <c:out value="${a.professional_summary}"/>
+                            </div>
+                        </c:if>
+
+                        <div class="mt-2 pt-2 border-top d-flex flex-wrap align-items-center gap-3 small">
+                            <c:choose>
+                                <c:when test="${not empty a.email or not empty a.phone}">
+                                    <div class="text-success fw-bold"><i class="fa-solid fa-lock-open me-1"></i> Contacto habilitado:</div>
+                                    <c:if test="${not empty a.email}">
+                                        <div><i class="fa-solid fa-envelope me-1 text-primary"></i> <a href="mailto:${a.email}"><c:out value="${a.email}"/></a></div>
+                                    </c:if>
+                                    <c:if test="${not empty a.phone}">
+                                        <div>
+                                            <i class="fa-solid fa-phone me-1 text-success"></i> <a href="tel:${a.phone}"><c:out value="${a.phone}"/></a>
+                                            <a href="https://wa.me/51${a.phone}" target="_blank" class="badge bg-success text-decoration-none ms-1"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+                                        </div>
+                                    </c:if>
+                                </c:when>
+                                <c:otherwise>
+                                    <span class="text-muted"><i class="fa-solid fa-lock me-1"></i> Contacto protegido por privacidad (disponible al pasar a Preseleccionado, Entrevista o Seleccionado).</span>
+                                </c:otherwise>
+                            </c:choose>
                         </div>
                     </div>
                 </c:if>
@@ -109,7 +191,7 @@
                 </c:if>
 
                 <!-- Acciones segun rol -->
-                <c:if test="${a.status != 'withdrawn'}">
+                <c:if test="${a.status != 'withdrawn' and a.status != 'RETIRADO'}">
                     <form method="post" action="${jobsPath}" class="d-flex flex-wrap align-items-center gap-2 mt-2 pt-2 border-top">
                         <hp:csrf/>
                         <input type="hidden" name="action" value="respond">
@@ -117,20 +199,22 @@
                         
                         <c:choose>
                             <c:when test="${companyMode}">
-                                <label class="small fw-bold text-muted me-2">Cambiar estado del postulante:</label>
+                                <label class="small fw-bold text-muted me-2">Estado del candidato:</label>
                                 <select class="form-select form-select-sm w-auto" name="status">
-                                    <option value="pending" ${a.status == 'pending' ? 'selected' : ''}>Pendiente</option>
-                                    <option value="reviewing" ${a.status == 'reviewing' ? 'selected' : ''}>En evaluación</option>
-                                    <option value="accepted" ${a.status == 'accepted' ? 'selected' : ''}>Aceptada / Contratado</option>
-                                    <option value="rejected" ${a.status == 'rejected' ? 'selected' : ''}>Rechazada</option>
+                                    <option value="POSTULADO" ${a.status == 'POSTULADO' or a.status == 'pending' ? 'selected' : ''}>Postulado</option>
+                                    <option value="EN_REVISION" ${a.status == 'EN_REVISION' or a.status == 'reviewing' ? 'selected' : ''}>En revisión</option>
+                                    <option value="PRESELECCIONADO" ${a.status == 'PRESELECCIONADO' ? 'selected' : ''}>Preseleccionado</option>
+                                    <option value="ENTREVISTA" ${a.status == 'ENTREVISTA' ? 'selected' : ''}>Entrevista</option>
+                                    <option value="SELECCIONADO" ${a.status == 'SELECCIONADO' or a.status == 'accepted' ? 'selected' : ''}>Seleccionado / Contratado</option>
+                                    <option value="NO_SELECCIONADO" ${a.status == 'NO_SELECCIONADO' or a.status == 'rejected' ? 'selected' : ''}>No seleccionado</option>
                                 </select>
                                 <button type="submit" class="btn btn-sm btn-success">
                                     <i class="fa-solid fa-check me-1"></i> Actualizar estado
                                 </button>
                             </c:when>
                             <c:otherwise>
-                                <c:if test="${a.status != 'accepted'}">
-                                    <button class="btn btn-sm btn-outline-danger" name="status" value="withdrawn" onclick="return confirm('¿Estás seguro de que deseas retirar tu postulación?');">
+                                <c:if test="${a.status != 'SELECCIONADO' and a.status != 'accepted'}">
+                                    <button class="btn btn-sm btn-outline-danger" name="status" value="RETIRADO" onclick="return confirm('¿Estás seguro de que deseas retirar tu postulación?');">
                                         <i class="fa-solid fa-trash me-1"></i> Retirar postulación
                                     </button>
                                 </c:if>

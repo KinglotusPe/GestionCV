@@ -20,10 +20,15 @@ public class RegisterServlet extends HttpServlet {
     private final UsuarioDAO userDAO = new UsuarioDAOImpl();
     private final RegistrationService registrationService = new RegistrationService();
 
+    private final com.cvmanager.dao.interfaces.CareerDAO careerDAO = new com.cvmanager.dao.impl.CareerDAOImpl();
+
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        try {
+            request.setAttribute("careers", careerDAO.findAll(true));
+        } catch (Exception ignored) {}
         request.setAttribute("pageTitle", "Registro de Cuenta - CVManager");
         request.getRequestDispatcher("/WEB-INF/views/auth/registro.jsp").forward(request, response);
     }
@@ -36,12 +41,7 @@ public class RegisterServlet extends HttpServlet {
         String password = request.getParameter("password");
         String role = request.getParameter("role");
 
-        String firstName = ValidacionUtil.clean(request.getParameter("firstName"));
-        String lastName = ValidacionUtil.clean(request.getParameter("lastName"));
-        String companyName = ValidacionUtil.clean(request.getParameter("companyName"));
-
         try {
-            // Validaciones del servidor
             if (!ValidacionUtil.email(email) || !ValidacionUtil.password(password) ||
                 (!"graduate".equals(role) && !"company".equals(role))) {
                 response.setStatus(400);
@@ -58,14 +58,55 @@ public class RegisterServlet extends HttpServlet {
             }
 
             if ("graduate".equals(role)) {
-                ValidacionUtil.text(firstName, "Nombres", 80, true);
-                ValidacionUtil.text(lastName, "Apellidos", 100, true);
-            } else ValidacionUtil.text(companyName, "Empresa", 150, true);
-            ValidacionUtil.text(email, "Correo", 150, true);
-            registrationService.register(email, password, role, firstName, lastName, companyName);
-            request.setAttribute("success", "Registro completado con éxito. Su cuenta se encuentra en estado 'pendiente' a la espera de aprobación por el administrador.");
+                com.cvmanager.models.Egresados graduate = new com.cvmanager.models.Egresados();
+                graduate.setFirstName(ValidacionUtil.clean(request.getParameter("firstName")));
+                graduate.setLastName(ValidacionUtil.clean(request.getParameter("lastName")));
+                graduate.setDocumentType("DNI");
+                graduate.setDocumentNumber(ValidacionUtil.clean(request.getParameter("documentNumber")));
+                graduate.setPhone(ValidacionUtil.clean(request.getParameter("phone")));
+                graduate.setInstitutionalCode(ValidacionUtil.clean(request.getParameter("institutionalCode")));
+                
+                String careerIdStr = request.getParameter("careerId");
+                if (careerIdStr != null && !careerIdStr.isBlank()) {
+                    graduate.setCareerId(Integer.valueOf(careerIdStr.trim()));
+                }
+                
+                String entryYearStr = request.getParameter("entryYear");
+                if (entryYearStr != null && !entryYearStr.isBlank()) {
+                    graduate.setEntryYear(Integer.valueOf(entryYearStr.trim()));
+                }
+                
+                String graduationYearStr = request.getParameter("graduationYear");
+                if (graduationYearStr != null && !graduationYearStr.isBlank()) {
+                    graduate.setGraduationYear(Integer.valueOf(graduationYearStr.trim()));
+                }
+                
+                String academicStatus = request.getParameter("academicStatus");
+                graduate.setAcademicStatus("ESTUDIANTE".equalsIgnoreCase(academicStatus) ? "ESTUDIANTE" : "EGRESADO");
+
+                registrationService.registerGraduate(email, password, graduate);
+            } else {
+                java.util.Map<String, String> data = new java.util.HashMap<>();
+                data.put("companyName", ValidacionUtil.clean(request.getParameter("companyName")));
+                data.put("tradeName", ValidacionUtil.clean(request.getParameter("tradeName")));
+                data.put("ruc", ValidacionUtil.clean(request.getParameter("ruc")));
+                data.put("industry", ValidacionUtil.clean(request.getParameter("industry")));
+                data.put("address", ValidacionUtil.clean(request.getParameter("address")));
+                data.put("phone", ValidacionUtil.clean(request.getParameter("phone")));
+                data.put("representativeName", ValidacionUtil.clean(request.getParameter("representativeName")));
+                data.put("representativeDni", ValidacionUtil.clean(request.getParameter("representativeDni")));
+                data.put("representativePosition", ValidacionUtil.clean(request.getParameter("representativePosition")));
+
+                registrationService.registerCompany(email, password, data);
+            }
+
+            request.setAttribute("success", "Registro completado con éxito. Su cuenta se encuentra en estado 'pendiente' a la espera de verificación y aprobación por el administrador.");
             doGet(request, response);
 
+        } catch (IllegalArgumentException e) {
+            response.setStatus(400);
+            request.setAttribute("error", e.getMessage());
+            doGet(request, response);
         } catch (Exception e) {
             throw new ServletException("Error al procesar el registro de usuario", e);
         }

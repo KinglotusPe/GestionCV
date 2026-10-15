@@ -66,6 +66,11 @@ public class JobsServlet extends HttpServlet {
             if(manager&&action.equals("save")) {
                 Map<String,String> params=new HashMap<>();req.getParameterMap().forEach((k,v)->params.put(k,v[0]));
                 portal.save(actor,role,id,params,req.getParameterValues("careerId"));
+                req.getSession().setAttribute("flashSuccess", "Convocatoria guardada exitosamente.");
+            }else if(manager&&action.equals("changeJobStatus")) {
+                String newStatus = req.getParameter("status");
+                portal.updateJobStatus(actor, role, id, newStatus);
+                req.getSession().setAttribute("flashSuccess", "Estado de la convocatoria actualizado a: " + newStatus);
             }else if(manager&&action.equals("archive"))portal.archive(actor,role,id,"yes".equals(req.getParameter("archived")));
             else if(manager&&action.equals("upload")) {
                 Part file=req.getPart("file");if(file==null)throw new IllegalArgumentException("Seleccione un PDF.");
@@ -74,8 +79,11 @@ public class JobsServlet extends HttpServlet {
             else if(role.equals("graduate")&&action.equals("apply")) {
                 if(!"yes".equals(req.getParameter("consent")))throw new IllegalArgumentException("Confirme que desea compartir su CV y datos con la empresa.");
                 service.apply(actor,id,req.getParameter("message"));
-            }else if(!role.equals("admin")&&action.equals("respond"))service.respond(actor,role.equals("company"),id,req.getParameter("status"));
-            else throw new IllegalArgumentException("Acción inválida.");
+                req.getSession().setAttribute("flashSuccess", "¡Tu postulación ha sido enviada exitosamente a la empresa!");
+            }else if(!role.equals("admin")&&action.equals("respond")) {
+                service.respond(actor,role.equals("company"),id,req.getParameter("status"));
+                req.getSession().setAttribute("flashSuccess", "Estado de la postulación actualizado exitosamente.");
+            }else throw new IllegalArgumentException("Acción inválida.");
             res.sendRedirect(req.getContextPath()+"/"+role+"/jobs?ok=1"+(Set.of("upload","removeDocument").contains(action)?"&view="+id:""));
         } catch (IllegalArgumentException e) {
             req.getSession().setAttribute("flashError", e.getMessage());

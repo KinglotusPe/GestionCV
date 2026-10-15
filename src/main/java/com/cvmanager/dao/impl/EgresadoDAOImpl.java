@@ -44,6 +44,18 @@ public class EgresadoDAOImpl implements EgresadosDAO {
 
         graduate.setPublicProfile(resultSet.getBoolean("is_public"));
 
+        try {
+            graduate.setInstitutionalCode(resultSet.getString("institutional_code"));
+        } catch (SQLException ignored) {}
+        try {
+            int entryYear = resultSet.getInt("entry_year");
+            graduate.setEntryYear(resultSet.wasNull() ? null : entryYear);
+        } catch (SQLException ignored) {}
+        try {
+            String academicStatus = resultSet.getString("academic_status");
+            graduate.setAcademicStatus(academicStatus != null ? academicStatus : "EGRESADO");
+        } catch (SQLException ignored) {}
+
         // Se captura el nombre de la carrera si viene del JOIN
         try {
             graduate.setCareerName(resultSet.getString("career_name"));
@@ -56,12 +68,20 @@ public class EgresadoDAOImpl implements EgresadosDAO {
 
     @Override
     public int create(Connection connection, Egresados graduate) throws Exception {
-        String sql = "INSERT INTO egresados(user_id, first_name, last_name) VALUES(?, ?, ?)";
+        String sql = "INSERT INTO egresados(user_id, first_name, last_name, document_type, document_number, institutional_code, phone, career_id, entry_year, graduation_year, academic_status) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement statement = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             statement.setInt(1, graduate.getUserId());
             statement.setString(2, graduate.getFirstName());
             statement.setString(3, graduate.getLastName());
+            statement.setString(4, graduate.getDocumentType() != null ? graduate.getDocumentType() : "DNI");
+            statement.setString(5, graduate.getDocumentNumber());
+            statement.setString(6, graduate.getInstitutionalCode());
+            statement.setString(7, graduate.getPhone());
+            if (graduate.getCareerId() != null) statement.setInt(8, graduate.getCareerId()); else statement.setNull(8, Types.INTEGER);
+            if (graduate.getEntryYear() != null) statement.setInt(9, graduate.getEntryYear()); else statement.setNull(9, Types.SMALLINT);
+            if (graduate.getGraduationYear() != null) statement.setInt(10, graduate.getGraduationYear()); else statement.setNull(10, Types.SMALLINT);
+            statement.setString(11, graduate.getAcademicStatus() != null ? graduate.getAcademicStatus() : "EGRESADO");
             statement.executeUpdate();
 
             try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
@@ -122,9 +142,9 @@ public class EgresadoDAOImpl implements EgresadosDAO {
     @Override
     public void update(Egresados graduate) throws Exception {
         String sql = "UPDATE egresados SET first_name = ?, last_name = ?, document_type = ?, " +
-                     "document_number = ?, phone = ?, address = ?, city = ?, country = ?, " +
+                     "document_number = ?, institutional_code = ?, phone = ?, address = ?, city = ?, country = ?, " +
                      "birth_date = ?, linkedin_url = ?, portfolio_url = ?, career_id = ?, " +
-                     "graduation_year = ?, is_public = ? WHERE graduate_id = ?";
+                     "entry_year = ?, graduation_year = ?, academic_status = ?, is_public = ? WHERE graduate_id = ?";
 
         try (Connection connection = DBConnection.getConnection();
              PreparedStatement statement = connection.prepareStatement(sql)) {
@@ -133,34 +153,42 @@ public class EgresadoDAOImpl implements EgresadosDAO {
             statement.setString(2, graduate.getLastName());
             statement.setString(3, graduate.getDocumentType());
             statement.setString(4, graduate.getDocumentNumber());
-            statement.setString(5, graduate.getPhone());
-            statement.setString(6, graduate.getAddress());
-            statement.setString(7, graduate.getCity());
-            statement.setString(8, graduate.getCountry());
+            statement.setString(5, graduate.getInstitutionalCode());
+            statement.setString(6, graduate.getPhone());
+            statement.setString(7, graduate.getAddress());
+            statement.setString(8, graduate.getCity());
+            statement.setString(9, graduate.getCountry());
 
             if (graduate.getBirthDate() != null) {
-                statement.setDate(9, graduate.getBirthDate());
+                statement.setDate(10, graduate.getBirthDate());
             } else {
-                statement.setNull(9, Types.DATE);
+                statement.setNull(10, Types.DATE);
             }
 
-            statement.setString(10, graduate.getLinkedinUrl());
-            statement.setString(11, graduate.getPortfolioUrl());
+            statement.setString(11, graduate.getLinkedinUrl());
+            statement.setString(12, graduate.getPortfolioUrl());
 
             if (graduate.getCareerId() != null) {
-                statement.setInt(12, graduate.getCareerId());
+                statement.setInt(13, graduate.getCareerId());
             } else {
-                statement.setNull(12, Types.INTEGER);
+                statement.setNull(13, Types.INTEGER);
+            }
+
+            if (graduate.getEntryYear() != null) {
+                statement.setInt(14, graduate.getEntryYear());
+            } else {
+                statement.setNull(14, Types.SMALLINT);
             }
 
             if (graduate.getGraduationYear() != null) {
-                statement.setInt(13, graduate.getGraduationYear());
+                statement.setInt(15, graduate.getGraduationYear());
             } else {
-                statement.setNull(13, Types.SMALLINT);
+                statement.setNull(15, Types.SMALLINT);
             }
 
-            statement.setBoolean(14, graduate.isPublicProfile());
-            statement.setInt(15, graduate.getGraduateId());
+            statement.setString(16, graduate.getAcademicStatus() != null ? graduate.getAcademicStatus() : "EGRESADO");
+            statement.setBoolean(17, graduate.isPublicProfile());
+            statement.setInt(18, graduate.getGraduateId());
             statement.executeUpdate();
         }
     }

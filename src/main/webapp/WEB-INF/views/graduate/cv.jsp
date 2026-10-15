@@ -47,12 +47,22 @@
         
         <div class="mb-3">
             <label class="form-label fw-bold">Titular Profesional del CV</label>
-            <input class="form-control" type="text" name="title" value="<c:out value='${cv.title}'/>" placeholder="Ej: Técnico en Redes y Telecomunicaciones | Soporte TI" required>
+            <input class="form-control" id="cvTitleInput" type="text" name="title" value="<c:out value='${cv.title}'/>" placeholder="Ej: Técnico en Redes y Telecomunicaciones | Soporte TI" required>
         </div>
 
         <div class="mb-3">
-            <label class="form-label fw-bold">Extracto / Perfil Profesional</label>
-            <textarea class="form-control" name="summary" rows="4" placeholder="Describa brevemente sus competencias técnicas, experiencia y objetivos profesionales..." required><c:out value="${cv.professionalSummary}"/></textarea>
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <label class="form-label fw-bold mb-0">Extracto / Perfil Profesional</label>
+                <div class="d-flex gap-1">
+                    <button type="button" class="btn btn-sm btn-outline-success py-0 px-2 small" onclick="askCvAI('generate_profile', 'cvSummaryInput', 'cvTitleInput')">
+                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Redactar con IA
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2 small" onclick="askCvAI('improve_text', 'cvSummaryInput')">
+                        <i class="fa-solid fa-sparkles me-1"></i> Profesionalizar
+                    </button>
+                </div>
+            </div>
+            <textarea class="form-control" id="cvSummaryInput" name="summary" rows="4" placeholder="Describa brevemente sus competencias técnicas, experiencia y objetivos profesionales..." required><c:out value="${cv.professionalSummary}"/></textarea>
         </div>
 
         <button class="btn btn-success fw-bold" type="submit">
@@ -177,7 +187,10 @@
                         <input class="form-control" type="text" name="position" placeholder="Cargo desempeñado" required>
                     </div>
                     <div class="col-md-4">
-                        <input class="form-control" type="text" name="responsibilities" placeholder="Responsabilidades clave">
+                        <div class="input-group">
+                            <input class="form-control" type="text" id="expRespInput" name="responsibilities" placeholder="Responsabilidades clave">
+                            <button class="btn btn-outline-success btn-sm" type="button" title="Mejorar redacción con IA" onclick="askCvAI('improve_text', 'expRespInput')"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+                        </div>
                     </div>
                     <div class="col-md-3">
                         <label class="form-label small text-muted mb-0">Fecha Inicio</label>
@@ -231,7 +244,10 @@
 <input type="hidden" name="csrfToken" value="${sessionScope.csrfToken}">
                     <input type="hidden" name="action" value="addSkill">
                     <div class="col-md-5">
-                        <input class="form-control" type="text" name="skillName" placeholder="Ej: Java, Redes Cisco, Diagnóstico Automotriz..." required>
+                        <div class="input-group">
+                            <input class="form-control" type="text" id="skillNameInput" name="skillName" placeholder="Ej: Java, Redes Cisco, Diagnóstico Automotriz..." required>
+                            <button class="btn btn-outline-success btn-sm" type="button" title="Sugerir con IA" onclick="askCvAI('improve_text', 'skillNameInput')"><i class="fa-solid fa-wand-magic-sparkles"></i></button>
+                        </div>
                     </div>
                     <div class="col-md-3">
                         <select class="form-select" name="category">
@@ -436,5 +452,45 @@
     </div>
 
 </div>
+
+<script>
+function askCvAI(action, targetFieldId, contextFieldId) {
+    const target = document.getElementById(targetFieldId);
+    if (!target) return;
+    const currentVal = target.value.trim();
+    const contextVal = contextFieldId ? document.getElementById(contextFieldId)?.value.trim() : '';
+
+    const originalPlaceholder = target.placeholder;
+    target.disabled = true;
+    target.placeholder = 'El Asistente de IA está redactando la sugerencia...';
+
+    const params = new URLSearchParams();
+    params.append('action', action);
+    params.append('prompt', currentVal);
+    params.append('jobTitle', contextVal);
+    params.append('career', '');
+
+    fetch('${pageContext.request.contextPath}/api/ai-assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString()
+    })
+    .then(r => r.json())
+    .then(data => {
+        target.disabled = false;
+        target.placeholder = originalPlaceholder;
+        if (data.success && data.suggestion) {
+            target.value = data.suggestion;
+        } else {
+            alert(data.error || 'No se pudo generar la propuesta con IA.');
+        }
+    })
+    .catch(err => {
+        target.disabled = false;
+        target.placeholder = originalPlaceholder;
+        alert('Error al comunicarse con el Asistente de IA.');
+    });
+}
+</script>
 
 <%@ include file="../common/footer.jsp" %>
