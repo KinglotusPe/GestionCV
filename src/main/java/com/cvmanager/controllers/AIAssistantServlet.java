@@ -37,43 +37,49 @@ public class AIAssistantServlet extends HttpServlet {
             String resultText = "";
             switch (action) {
                 case "generateGraduateProfile":
-                    String carrera = req.getParameter("carrera");
-                    String habilidades = req.getParameter("habilidades");
-                    String intereses = req.getParameter("intereses");
+                case "profile":
+                    String carrera = req.getParameter("carrera") != null ? req.getParameter("carrera") : req.getParameter("career");
+                    String habilidades = req.getParameter("habilidades") != null ? req.getParameter("habilidades") : req.getParameter("prompt");
+                    String intereses = req.getParameter("intereses") != null ? req.getParameter("intereses") : "";
                     resultText = aiService.generateGraduateProfile(carrera, habilidades, intereses);
                     break;
 
                 case "improveExperience":
-                    String puestoExp = req.getParameter("puesto");
-                    String empresaExp = req.getParameter("empresa");
-                    String descExp = req.getParameter("descripcion");
+                case "experience":
+                    String puestoExp = req.getParameter("puesto") != null ? req.getParameter("puesto") : req.getParameter("jobTitle");
+                    String empresaExp = req.getParameter("empresa") != null ? req.getParameter("empresa") : "";
+                    String descExp = req.getParameter("descripcion") != null ? req.getParameter("descripcion") : req.getParameter("prompt");
                     resultText = aiService.improveExperience(puestoExp, empresaExp, descExp);
                     break;
 
                 case "improveSkills":
-                    String carreraSkills = req.getParameter("carrera");
-                    String rawSkills = req.getParameter("habilidades");
+                case "skills":
+                    String carreraSkills = req.getParameter("carrera") != null ? req.getParameter("carrera") : req.getParameter("career");
+                    String rawSkills = req.getParameter("habilidades") != null ? req.getParameter("habilidades") : req.getParameter("prompt");
                     resultText = aiService.improveSkills(carreraSkills, rawSkills);
                     break;
 
                 case "generateJobDescription":
-                    String tituloPuesto = req.getParameter("puesto");
-                    String modalidad = req.getParameter("modalidad");
-                    String sector = req.getParameter("sector");
-                    String datos = req.getParameter("datos");
+                case "job_description":
+                    String tituloPuesto = req.getParameter("puesto") != null ? req.getParameter("puesto") : req.getParameter("jobTitle");
+                    String modalidad = req.getParameter("modalidad") != null ? req.getParameter("modalidad") : "";
+                    String sector = req.getParameter("sector") != null ? req.getParameter("sector") : "";
+                    String datos = req.getParameter("datos") != null ? req.getParameter("datos") : req.getParameter("prompt");
                     resultText = aiService.generateJobDescription(tituloPuesto, modalidad, sector, datos);
                     break;
 
                 case "generateJobRequirements":
-                    String reqPuesto = req.getParameter("puesto");
-                    String reqCarrera = req.getParameter("carrera");
-                    String reqBorrador = req.getParameter("requisitos");
+                case "job_requirements":
+                    String reqPuesto = req.getParameter("puesto") != null ? req.getParameter("puesto") : req.getParameter("jobTitle");
+                    String reqCarrera = req.getParameter("carrera") != null ? req.getParameter("carrera") : req.getParameter("career");
+                    String reqBorrador = req.getParameter("requisitos") != null ? req.getParameter("requisitos") : req.getParameter("prompt");
                     resultText = aiService.generateJobRequirements(reqPuesto, reqCarrera, reqBorrador);
                     break;
 
                 case "improveText":
-                    String tipo = req.getParameter("tipo");
-                    String texto = req.getParameter("texto");
+                case "text":
+                    String tipo = req.getParameter("tipo") != null ? req.getParameter("tipo") : "general";
+                    String texto = req.getParameter("texto") != null ? req.getParameter("texto") : req.getParameter("prompt");
                     resultText = aiService.improveText(tipo, texto);
                     break;
 
@@ -84,7 +90,7 @@ public class AIAssistantServlet extends HttpServlet {
             }
 
             String escaped = escapeJson(resultText);
-            res.getWriter().write("{\"success\":true,\"result\":\"" + escaped + "\"}");
+            res.getWriter().write("{\"success\":true,\"result\":\"" + escaped + "\",\"suggestion\":\"" + escaped + "\"}");
 
         } catch (Exception e) {
             res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

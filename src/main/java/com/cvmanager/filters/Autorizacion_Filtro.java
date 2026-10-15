@@ -38,6 +38,11 @@ public class Autorizacion_Filtro implements Filter {
         String contextPath = httpRequest.getContextPath();
         String path = uri.substring(contextPath.length());
 
+        if (!path.startsWith("/graduate/") && !path.startsWith("/company/") && !path.startsWith("/admin/")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         boolean isAuthorized = false;
 
         if (path.startsWith("/graduate/") && "graduate".equals(role)) {

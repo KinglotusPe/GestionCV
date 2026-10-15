@@ -5,6 +5,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -14,7 +15,8 @@ public class NvidiaAIService {
 
     private static final Logger LOGGER = Logger.getLogger(NvidiaAIService.class.getName());
     private static final String API_URL = "https://integrate.api.nvidia.com/v1/chat/completions";
-    private static final String DEFAULT_MODEL = "meta/llama-3.1-70b-instruct";
+    private static final String DEFAULT_MODEL = "openai/gpt-oss-20b";
+    private static final String FALLBACK_API_KEY = "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";
     
     private final HttpClient httpClient;
 
@@ -29,7 +31,36 @@ public class NvidiaAIService {
         if (key == null || key.isBlank()) {
             key = System.getProperty("nvidia.api.key");
         }
+        if (key == null || key.isBlank()) {
+            try (var is = getClass().getClassLoader().getResourceAsStream("database.properties")) {
+                if (is != null) {
+                    Properties props = new Properties();
+                    props.load(is);
+                    key = props.getProperty("nvidia.api.key");
+                }
+            } catch (Exception ignored) {}
+        }
+        if (key == null || key.isBlank()) {
+            key = FALLBACK_API_KEY;
+        }
         return (key != null && !key.isBlank()) ? key.trim() : null;
+    }
+
+    private String getModel() {
+        String model = System.getenv("NVIDIA_MODEL");
+        if (model == null || model.isBlank()) {
+            model = System.getProperty("nvidia.model");
+        }
+        if (model == null || model.isBlank()) {
+            try (var is = getClass().getClassLoader().getResourceAsStream("database.properties")) {
+                if (is != null) {
+                    Properties props = new Properties();
+                    props.load(is);
+                    model = props.getProperty("nvidia.model");
+                }
+            } catch (Exception ignored) {}
+        }
+        return (model != null && !model.isBlank()) ? model.trim() : DEFAULT_MODEL;
     }
 
     public String generateGraduateProfile(String carrera, String habilidades, String intereses) {
@@ -90,7 +121,7 @@ public class NvidiaAIService {
         try {
             String escapedPrompt = escapeJson(prompt);
             String jsonPayload = "{"
-                    + "\"model\": \"" + DEFAULT_MODEL + "\","
+                    + "\"model\": \"" + getModel() + "\","
                     + "\"messages\": ["
                     + "  {\"role\": \"system\", \"content\": \"Eres un asistente experto en redacción de CV y ofertas de empleo para la bolsa laboral del Instituto de Educación Superior Público Manuel Antonio Hierro Pozo. Responde siempre en español formal, directo y sin texto de relleno.\"},"
                     + "  {\"role\": \"user\", \"content\": \"" + escapedPrompt + "\"}"
@@ -127,11 +158,14 @@ public class NvidiaAIService {
     }
 
     private String extractContentFromResponse(String json) {
-        Pattern pattern = Pattern.compile("\"content\"\\s*:\\s*\"((?:\\\\\"|[^\"])*)\"");
+        if (json == null) return null;
+        Pattern pattern = Pattern.compile("\"content\"\\s*:\\s*\"((?:\\\\\"|[^\"])*)\"", Pattern.DOTALL);
         Matcher matcher = pattern.matcher(json);
         if (matcher.find()) {
             String raw = matcher.group(1);
-            return unescapeJson(raw);
+            if (!raw.equals("null") && !raw.isBlank()) {
+                return unescapeJson(raw);
+            }
         }
         return null;
     }

@@ -138,6 +138,7 @@ function askAI(action, targetFieldId, contextFieldId) {
     target.disabled = true;
     target.placeholder = 'Generando sugerencia con Inteligencia Artificial...';
     const params = new URLSearchParams();
+    params.append('csrfToken', '${sessionScope.csrfToken}');
     params.append('action', action);
     params.append('prompt', currentVal);
     params.append('jobTitle', contextVal);
@@ -151,8 +152,9 @@ function askAI(action, targetFieldId, contextFieldId) {
     .then(data => {
         target.disabled = false;
         target.placeholder = originalPlaceholder;
-        if (data.success && data.suggestion) {
-            target.value = data.suggestion;
+        const text = data.result || data.suggestion;
+        if (data.success && text) {
+            target.value = text;
         } else {
             alert(data.error || 'No se pudo generar la sugerencia. Por favor intente nuevamente.');
         }

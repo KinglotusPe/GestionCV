@@ -465,6 +465,7 @@ function askCvAI(action, targetFieldId, contextFieldId) {
     target.placeholder = 'El Asistente de IA está redactando la sugerencia...';
 
     const params = new URLSearchParams();
+    params.append('csrfToken', '${sessionScope.csrfToken}');
     params.append('action', action);
     params.append('prompt', currentVal);
     params.append('jobTitle', contextVal);
@@ -479,8 +480,9 @@ function askCvAI(action, targetFieldId, contextFieldId) {
     .then(data => {
         target.disabled = false;
         target.placeholder = originalPlaceholder;
-        if (data.success && data.suggestion) {
-            target.value = data.suggestion;
+        const text = data.result || data.suggestion;
+        if (data.success && text) {
+            target.value = text;
         } else {
             alert(data.error || 'No se pudo generar la propuesta con IA.');
         }
